@@ -1,0 +1,5 @@
+<mat-form-field id="formField">
+    <input *ngIf="!textbox" matInput [placeholder]="text" (input)="setInput($event.target.value)" [value]="inputValue">
+    <textarea *ngIf="textbox" matInput [placeholder]="text" (input)="setInput($event.target.value)" [value]="inputValue">
+    </textarea>
+</mat-form-field>

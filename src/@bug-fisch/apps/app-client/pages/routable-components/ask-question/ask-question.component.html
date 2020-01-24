@@ -1,0 +1,20 @@
+<div class="content">
+    <div class="centered_div">
+        <div >
+            <div >
+                <app-input-component type="action" [textbox]="true" width="400" text="Deine Frage"
+                    actionInputBinding="Action.SaveQuestion.Data.Text">
+                </app-input-component>
+            </div>
+            <div>
+                <app-select-component width="400" text="Jugendstunde"
+                    outputValueBinding="Action.SaveQuestion.Data.Category" listDataBinding="Data.JugendStunde"
+                    showValues="Thema, Datum"></app-select-component>
+            </div>
+            <div >
+                <app-action-button width="400" text="Absenden" actionBinding="SaveQuestion">
+                </app-action-button>
+            </div>
+        </div>
+    </div>
+</div>
