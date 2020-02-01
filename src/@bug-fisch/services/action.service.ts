@@ -53,7 +53,6 @@ export class ActionService {
     }
 
     private getActionBinding(binding: string): string {
-        console.log(binding)
         let name = binding.split('.')[1];
         let object = this.actions.find(a => a.Name === name).Input
         for (let counter = 2; counter < binding.split('.').length; counter++) {
@@ -84,7 +83,6 @@ export class ActionService {
     }
 
     private handleAction(clientAction: Action) {
-        console.log(clientAction)
         switch (clientAction.Type) {
             case 'DeleteActionInClientAction':
                 break;
@@ -96,6 +94,9 @@ export class ActionService {
                 break;
             case 'SetTokenClientAction':
                 localStorage.setItem('Token', clientAction.Input.Token);
+                break;
+            case 'ClearDataClientActoin':
+                this.dataService.data = [];
                 break;
             default:
                 break;

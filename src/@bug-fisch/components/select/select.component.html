@@ -1,4 +1,4 @@
-<mat-form-field id="formField">
+<mat-form-field id="app-select-component">
   <mat-label>{{text}}</mat-label>
   <mat-select (selectionChange)="onChange($event)">
     <mat-option *ngFor="let data of dataList" [value]="data.ID">
@@ -6,7 +6,6 @@
         <div fxFlex="75">{{getDataItemsAsString(data, 1)}}</div>
         <div fxFlex="25" style="text-align: right"><div style="float: right">&nbsp;&nbsp;&nbsp;&nbsp;{{getDataItemsAsString(data, 2)}}</div></div>
       </div>
-      
     </mat-option>
   </mat-select>
 </mat-form-field>

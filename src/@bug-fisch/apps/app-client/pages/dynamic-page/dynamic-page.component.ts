@@ -47,7 +47,7 @@ export class DynamicPageComponent implements OnInit, AfterViewInit {
   }
 
   loadStadardComponents(): void {
-    console.log(this.componentFactoryResolver);
+    console.log(this.componentFactoryResolver)
     const moduleRefList = this.componentFactoryResolver['_ngModule']['_def']['modules']
       .find((x: any) => x.name === 'RoutableComponentsModule')['__annotations__'][0]['imports'];
     moduleRefList.forEach((moduleRef: any) => {

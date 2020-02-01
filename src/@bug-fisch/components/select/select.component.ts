@@ -8,9 +8,12 @@ import { ActionService } from 'src/@bug-fisch/services/action.service';
 })
 export class SelectComponent implements OnInit, AfterViewInit {
 
-  @Input() listDataBinding = ''
+  @Input() listDataBinding = '';
   @Input() outputValueBinding = '';
   @Input() showValues = '';
+  @Input() selectAllOptionText = '';
+  @Input() selectAllOptionAction = '';
+  @Input() onSelectActionBinding = '';
   @Input() text = '';
   @Input() width = '';
 
@@ -22,18 +25,29 @@ export class SelectComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    if(this.selectAllOptionAction !== ''){
+      let object = {}
+      object['ID'] = 'all';
+      object[this.showValues.split(',')[0]]  = this.selectAllOptionText; 
+      this.dataList.push(object)
+    }
     let data = this.actionService.getInputValueByBinding(this.listDataBinding);
-    let i = 0
+    let i = 0;
     while (data[i]) {
       this.dataList.push(data[i]);
       i++;
     }
+    
   }
 
   ngAfterViewInit(): void {
-    if (this.width === '')
-      return
-    (document.getElementsByClassName('mat-form-field-infix')[1] as HTMLElement).style.width = this.width + 'px';
+    if (this.width === '') {
+      return;
+    }
+    if(document.getElementsByClassName('mat-form-field-infix').length > 0){
+      (document.getElementsByClassName('mat-form-field-infix')[0] as HTMLElement).style.width = this.width + 'px';
+    }
+    (document.getElementById('app-select-component') as HTMLElement).style.width = this.width + 'px';
   }
 
   setInput(input: string): void {
@@ -44,7 +58,15 @@ export class SelectComponent implements OnInit, AfterViewInit {
     return data[this.showValues.split(',')[number - 1].replace(' ', '')] as string;
   }
 
-  onChange(event): void {
-    this.actionService.setInputValueByBinding(this.outputValueBinding, '' + event.value)
+  onChange(event: any): void {
+    if(event.value == 'all'){
+      this.actionService.runAction(this.selectAllOptionAction);
+      this.actionService.setInputValueByBinding(this.outputValueBinding, '');
+      return;
+    }
+    this.actionService.setInputValueByBinding(this.outputValueBinding, '' + event.value);
+    if (this.onSelectActionBinding !== '') {
+      this.actionService.runAction(this.onSelectActionBinding);
+    }
   }
 }

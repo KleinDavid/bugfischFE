@@ -1,0 +1,8 @@
+<div id="app-text-component">
+    <div *ngIf="inputValue.length > 0" class="mat-typography">
+        <div *ngIf="icon.length > 0" class="show-icon">
+            <mat-icon>{{icon}}</mat-icon>&nbsp;&nbsp;
+        </div>
+        <div class="show-text">{{inputValue}}</div>
+    </div>
+</div>

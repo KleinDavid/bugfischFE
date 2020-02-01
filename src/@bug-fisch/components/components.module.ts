@@ -4,6 +4,7 @@ import { ActionButtonModule } from './action-button/action-button.module';
 import { SelectModule } from './select/select.module';
 import { BrowserModule } from '@angular/platform-browser'
 import { DataTableModule } from './dataTable/dataTable.module';
+import { TextModule } from './text/text.module';
 
 
 @NgModule({
@@ -11,13 +12,15 @@ import { DataTableModule } from './dataTable/dataTable.module';
         InputModule,
         ActionButtonModule,
         SelectModule,
-        DataTableModule
+        DataTableModule,
+        TextModule
     ],
     exports: [
         InputModule,
         ActionButtonModule,
         SelectModule,
-        DataTableModule
+        DataTableModule,
+        TextModule
     ]
 })
 export class ComponentsModule { }
