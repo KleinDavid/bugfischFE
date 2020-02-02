@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, AfterViewInit } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit, HostListener } from '@angular/core';
 import { ActionService } from 'src/@bug-fisch/services/action.service';
 
 @Component({
@@ -11,6 +11,14 @@ export class ActionButtonComponent implements AfterViewInit {
   @Input() actionBinding = ' ';
   @Input() text = '';
   @Input() width = '';
+  @Input() enterReaction = false;
+
+  @HostListener('window:keyup', ['$event'])
+  keyEvent(event: KeyboardEvent) {
+    if (this.enterReaction && event.keyCode === 13) {
+      this.onClick();
+    }
+  }
 
   constructor(private actionService: ActionService) { }
 
