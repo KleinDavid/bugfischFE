@@ -21,7 +21,7 @@ export class ActionService {
             let serverActions = res.Actions.filter(action => {
                 return action.Execute === 'Server'
             });
-            this.actions = serverActions;
+            this.setNewActionsAfterResult(res.ActionIds, serverActions)
             
             let clientActions = res.Actions.filter(action => {
                 return action.Execute === 'Client'
@@ -30,6 +30,24 @@ export class ActionService {
                 this.handleAction(action)
             })
         });
+    }
+
+    private setNewActionsAfterResult(actionIds: string[], serverActions: Action[]){
+        let currentActions: Action[] = []
+        currentActions = this.actions.filter(action => {
+            return actionIds.includes(action.Id);
+        });
+        console.log('current', currentActions, actionIds, this.actions)
+        serverActions.forEach(action => {
+            let oldAction = currentActions.find(currentAction => (action.Id === currentAction.Id));
+            if (oldAction) {
+                oldAction = action;
+            } else {
+                currentActions.push(action);
+            }
+        });
+        this.actions = currentActions;
+        console.log(this.actions);
     }
 
     updateActionInput(name: string, inputName: string, data: string) {
