@@ -9,7 +9,9 @@
 
 .table-container {
   border: 1px solid rgb(224, 224, 224);
-  max-height: calc(100% - 100px);
+  width: 100%;
+  max-height: 100%;
+  position: absolute;
   overflow: auto;
 }
 

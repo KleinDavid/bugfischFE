@@ -6,11 +6,10 @@ import { ActionService } from 'src/@bug-fisch/services/action.service';
   templateUrl: './action-button.component.html',
   styleUrls: ['./action-button.component.scss']
 })
-export class ActionButtonComponent implements AfterViewInit {
+export class ActionButtonComponent {
 
   @Input() actionBinding = ' ';
   @Input() text = '';
-  @Input() width = '';
   @Input() enterReaction = false;
 
   @HostListener('window:keyup', ['$event'])
@@ -24,10 +23,6 @@ export class ActionButtonComponent implements AfterViewInit {
 
   onClick(): void {
     this.actionService.runAction(this.actionBinding);
-  }
-
-  ngAfterViewInit(): void {
-    (document.getElementsByClassName('mat-button')[0] as HTMLElement).style.minWidth = this.width + 'px';
   }
 
 }

@@ -5,14 +5,17 @@ import { Subject } from 'rxjs';
 import { Action } from '../model/action.model';
 import { Server } from 'http';
 import { ServerResult } from '../model/serverResult.model';
+import { Websocket, WebsocketService } from './websocket.service';
 
 @Injectable()
 export class ActionService {
 
     routingSubject: Subject<string> = new Subject<string>();
-    actions: Action[] = []
+    actions: Action[] = [];
+    websocket: Websocket;
 
-    constructor(private _rest: RestService, private dataService: DataService) {
+    constructor(private _rest: RestService, private dataService: DataService, private websocketService: WebsocketService) {
+        this.websocket = this.websocketService.getNewWebsocket()
     }
 
     public executeAction(action: Action) {
@@ -37,7 +40,6 @@ export class ActionService {
         currentActions = this.actions.filter(action => {
             return actionIds.includes(action.Id);
         });
-        console.log('current', currentActions, actionIds, this.actions)
         serverActions.forEach(action => {
             let oldAction = currentActions.find(currentAction => (action.Id === currentAction.Id));
             if (oldAction) {
@@ -47,7 +49,6 @@ export class ActionService {
             }
         });
         this.actions = currentActions;
-        console.log(this.actions);
     }
 
     updateActionInput(name: string, inputName: string, data: string) {
@@ -115,6 +116,10 @@ export class ActionService {
                 break;
             case 'ClearDataClientActoin':
                 this.dataService.data = [];
+                break;
+            case 'InitializeWebsocketClientAction':
+                this.websocket.connect(clientAction.Input.Path);
+                this.websocket.sendRequest(localStorage.getItem('Token'));
                 break;
             default:
                 break;

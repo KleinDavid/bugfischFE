@@ -1,0 +1,20 @@
+<div class="no-scroll-container">
+    <app-action-button class="logoutButton" text="Logout" actionBinding="LogoutAction">
+    </app-action-button>
+    <div class="question-table-inner">
+        <div fxLayout="row">
+            <app-select-component fxFlex="30" fxFlex.xs="100" text="Jugendstunde" outputValueBinding="Action.FilterDataAction.Condition"
+                listDataBinding="Data.JugendStunde" showValues="Thema, Datum" onSelectActionBinding="FilterDataAction"
+                selectAllOptionAction="GetAllQuestionsAction" selectAllOptionText="- Alle -">
+            </app-select-component>
+            <div fxFlex="70" fxFlex.xs="0"></div>
+            <!---->
+        </div>
+        <div class="full-height-table-container">
+            <div class="full-height-table">
+                <app-data-table class="full-height-table" fxFlex="100" listDataBinding='Data.Question'
+                    showValues="text"></app-data-table>
+            </div>
+        </div>
+    </div>
+</div>

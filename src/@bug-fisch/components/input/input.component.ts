@@ -7,7 +7,7 @@ import { DataService } from 'src/@bug-fisch/services/data.service';
   templateUrl: './input.component.html',
   styleUrls: ['./input.component.scss']
 })
-export class InputComponent implements OnInit, AfterViewInit {
+export class InputComponent implements OnInit {
 
   @Input() actionInputBinding = '';
   @Input() text = '';
@@ -22,12 +22,7 @@ export class InputComponent implements OnInit, AfterViewInit {
   constructor(private actionService: ActionService, private dataService: DataService) {
 
   }
-  
-  ngAfterViewInit(): void {
-    if (this.width === '')
-      return
-    document.getElementById('formField').style.width = this.width + 'px';
-  }
+ 
 
   ngOnInit(): void {
     this.inputValue = this.actionService.getInputValueByBinding(this.actionInputBinding) 

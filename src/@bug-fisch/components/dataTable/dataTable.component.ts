@@ -2,6 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ActionService } from 'src/@bug-fisch/services/action.service';
 import { DataService } from 'src/@bug-fisch/services/data.service';
 import { MatTableDataSource } from '@angular/material';
+import { MediaObserver, MediaChange } from '@angular/flex-layout';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-data-table',
@@ -14,15 +16,25 @@ export class DataTableComponent implements OnInit {
   @Input() columnNames = ['Frage', 'Thema', 'Datum']
   @Input() columnDataBindings = ['Text', 'Category.Thema', 'Category.Datum']
   @Input() columnWidth = ['75', '20', '5']
+  @Input() columnsToHideOnXs = ['Datum', 'Thema']
 
   dataList: any[] = [];
   flatTableDataList: any[] = []
   tableDataSource = new MatTableDataSource<any>(this.flatTableDataList);
-  // displayedColumns: string[] = ['Text', 'Thema', 'Datum'];
   displayedColumns: string[] = [];
 
-  constructor(private actionService: ActionService, private dataService: DataService) {
+  flexMediaWatcher: Subscription;
+  currentScreenWidth: string = '';
 
+
+  constructor(private actionService: ActionService, private dataService: DataService, private mediaObserver: MediaObserver) {
+    this.flexMediaWatcher = mediaObserver.media$.subscribe((change: MediaChange) => {
+      if (change.mqAlias !== this.currentScreenWidth) {
+        this.currentScreenWidth = change.mqAlias;
+        console.log(this.currentScreenWidth);
+        this.getDispayedColumns();
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -36,7 +48,6 @@ export class DataTableComponent implements OnInit {
   initTableData(): void {
     this.dataList = [];
     let data = this.actionService.getInputValueByBinding(this.listDataBinding);
-    console.log(data)
     let i = 0
     while (data[i]) {
       this.dataList.push(data[i]);
@@ -64,12 +75,15 @@ export class DataTableComponent implements OnInit {
   }
 
   getDispayedColumns(): void {
+    this.displayedColumns = [];
     this.columnDataBindings.forEach(binding => {
       let columnName = ''
       binding.split('.').forEach(bindingValue => {
         columnName = bindingValue
-      })
-      this.displayedColumns.push(columnName)
+      });
+      if (!(this.currentScreenWidth === 'xs' && this.columnsToHideOnXs.includes(columnName))) {
+        this.displayedColumns.push(columnName)
+      }
     })
   }
 

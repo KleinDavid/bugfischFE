@@ -6,7 +6,7 @@ import { ActionService } from 'src/@bug-fisch/services/action.service';
   templateUrl: './select.component.html',
   styleUrls: ['./select.component.scss']
 })
-export class SelectComponent implements OnInit, AfterViewInit {
+export class SelectComponent implements OnInit{
 
   @Input() listDataBinding = '';
   @Input() outputValueBinding = '';
@@ -15,7 +15,6 @@ export class SelectComponent implements OnInit, AfterViewInit {
   @Input() selectAllOptionAction = '';
   @Input() onSelectActionBinding = '';
   @Input() text = '';
-  @Input() width = '';
 
   selectedValue = '';
   dataList: any[] = [];
@@ -38,16 +37,6 @@ export class SelectComponent implements OnInit, AfterViewInit {
       i++;
     }
     
-  }
-
-  ngAfterViewInit(): void {
-    if (this.width === '') {
-      return;
-    }
-    if(document.getElementsByClassName('mat-form-field-infix').length > 0){
-      (document.getElementsByClassName('mat-form-field-infix')[0] as HTMLElement).style.width = this.width + 'px';
-    }
-    (document.getElementById('app-select-component') as HTMLElement).style.width = this.width + 'px';
   }
 
   setInput(input: string): void {
