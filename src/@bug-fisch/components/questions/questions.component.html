@@ -1,0 +1,133 @@
+<div fxLayout="row wrap">
+    <div *ngIf="failedList.length > 0" class="red-text">* Bitte beantworte alle Fragen mit Antwortmöglichkeiten</div>
+    <ng-container *ngFor="let question of dataList">
+        <div *ngIf="getPreQuestionHalfPage(question.Id)" fxFlex="4"></div>
+        <div *ngIf="checkCondition(question)" [fxFlex]="(question.HalfPage == 1) ? '48' : '100'" class="question">
+            <ng-container *ngIf="question.Type !== 3">
+                <b>
+                    <div *ngIf="!checkIfValueInList(question.Id)" class="question-text">
+                        {{question.Text}}
+                        <ng-container *ngIf="question.Required == '1'">
+                            *
+                        </ng-container>
+                    </div>
+                    <div *ngIf="checkIfValueInList(question.Id)" class="question-text red-text">
+                        {{question.Text}}
+                        <ng-container *ngIf="question.Required == '1'">
+                            *
+                        </ng-container>
+                    </div>
+                </b></ng-container>
+            <div class="question-answer">
+                <ng-container *ngIf="question.Type == 1">
+                    <div class="input-option-out">
+                        <textarea class="input-option" cols="50" rows="4"
+                            (input)="setAnswer(question.Id, $event.target.value, question.Type)"></textarea>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="question.Type == 2">
+                    <ng-container *ngFor="let option of question.Options; let isLast = last">
+                        <div class="question-option-out" [ngClass]="isLast ? '' : 'line-bottom'"
+                            (click)="setAnswer(question.Id, option.Value, question.Type)">
+                            <div class="question-option-inner" fxLayout="row">
+                                <div class="question-option-radio-button">
+                                    <div *ngIf="checkIfValueIsAnAnswer(question.Id, option.Value)">
+                                        <svg class="question-option-radio-button">
+                                            <circle id="eins" cx="17" cy="17" r="8" stroke="black" stroke-width="1"
+                                                fill="black" />
+                                        </svg>
+                                    </div>
+                                    <div *ngIf="!checkIfValueIsAnAnswer(question.Id, option.Value)">
+                                        <svg class="question-option-radio-button">
+                                            <circle id="eins" cx="17" cy="17" r="8" stroke="black" stroke-width="1"
+                                                fill="white" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="question-option-text">{{option.Text}}</div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="question.Type == 3">
+                    <div fxLayout="row">
+                        <div class="sliderTextLeft" fxFlex="20">{{question.Text}}</div>
+                        <div fxFlex="80">
+                            <div class="input-option-out">
+                                <input class="input-option"
+                                    (input)="setAnswer(question.Id, $event.target.value, question.Type)" />
+                            </div>
+                        </div>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="question.Type == 7">
+                    <ng-container *ngFor="let option of question.Options; let isLast = last">
+                        <div class="question-option-out" [ngClass]="isLast ? '' : 'line-bottom'"
+                            (click)="setAnswer(question.Id, option.Value, question.Type)">
+                            <div class="question-option-inner" fxLayout="row">
+                                <div class="question-option-radio-button">
+                                    <div *ngIf="checkIfValueIsAnAnswer(question.Id, option.Value)">
+                                        <div class="checkboxChecked">
+                                            <svg width="16" height="16" viewBox="0 0 24 24">
+                                                <path
+                                                    d="M0 0v24h24v-24h-24zm10.041 17l-4.5-4.319 1.395-1.435 3.08 2.937 7.021-7.183 1.422 1.409-8.418 8.591z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <div *ngIf="!checkIfValueIsAnAnswer(question.Id, option.Value)">
+                                        <svg class="question-option-radio-button">
+                                            <rect x="9" y="9" height="16" width="16" fill="black" />
+                                            <rect x="10" y="10" height="14" width="14" fill="white" />
+                                        </svg>
+                                    </div>
+                                </div>
+                                <div class="question-option-text">{{option.Text}}</div>
+                            </div>
+                        </div>
+                    </ng-container>
+                </ng-container>
+                <ng-container *ngIf="question.Type == 5">
+                    <div fxLayout="row">
+                        <div class="sliderTextLeft" fxFlex="10">{{question.MinText}}</div>
+                        <div fxFlex="80">
+                            <mat-slider class="slider" max="100" min="0" step="1" tickInterval="" [vertical]="false"
+                                (input)="setAnswer(question.Id, $event.value, question.Type)">
+                            </mat-slider>
+                        </div>
+                        <div class="sliderTextRight" fxFlex="10">{{question.MaxText}}</div>
+                    </div>
+                </ng-container>
+                <ng-container *ngIf="question.Type == 4">
+                    <div flexLayout="row">
+                        <div fxFlex="25"></div>
+                        <div fxFlex="50">
+                            <div class="max-text">{{question.MaxText}}</div>
+                            <div #activeList="cdkDropList" class="box-list" cdkDropList
+                                cdkDropListOrientation="vertical"
+                                [cdkDropListData]="getAnwerListByQuestionId(question.Id)"
+                                (cdkDropListDropped)="drop($event, question.Id, question.Type)">
+                                <div class="drag-box" *ngFor="let option of getAnwerListByQuestionId(question.Id)"
+                                    cdkDrag>
+                                    <b>{{getOptionTextByQuestionIdAndOptionValue(question.Id, option)}}</b>
+                                </div>
+                            </div>
+                            <div class="min-text">{{question.MinText}}</div>
+                        </div>
+                        <div fxFlex="25"></div>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+    </ng-container>
+</div>
+<!--<table mat-table [dataSource]="tableDataSource" class="full-width data-table mat-table">
+        <ng-container *ngFor="let columnName of displayedColumns" [matColumnDef]="columnName" sticky>
+            <th mat-header-cell *matHeaderCellDef width="{{getColumnWidthByDisplayedColumn(columnName)}}">
+                {{getHeaderNameByDisplayedColumn(columnName)}} </th>
+            <td mat-cell *matCellDef="let element" width="{{getColumnWidthByDisplayedColumn(columnName)}}">
+                {{element[columnName]}} </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>-->

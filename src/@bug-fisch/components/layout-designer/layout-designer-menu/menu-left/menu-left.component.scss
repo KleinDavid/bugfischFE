@@ -1,0 +1,18 @@
+#atled-layout-designer-menu-left {
+  background-image: linear-gradient(#e5e5e5, white);
+  height: 100%;
+  
+  .menu-left-icon {
+    cursor: pointer;
+    font-size: 36px;
+    width: 36px;
+  }
+
+  .menu-left-icon:hover {
+    background-color: #c9c9c9;
+  }
+
+  .menu-left-icon-active {
+    background-color: #c9c9c9;
+  }
+}

@@ -1,0 +1,12 @@
+<div class="content">
+    <div class="space-around">
+        <div class="question-title"><b>Umfrage Jugend Forum Hoffung</b></div>
+        <hr/>
+        <app-questions questionDataBinding="Data.SurvayQuestion" optionsBinding="Options" failedListBinding="Data.FailedAnswerSaving"></app-questions>
+        <div class="nextQuestionContainer">
+            <app-action-button class="nextQuestionBtn" text="WEITER" actionBinding="SaveQuestionAction"
+                styleType="1" [scrollUpAfterClick]="true">
+            </app-action-button>
+        </div>
+    </div>
+</div>

@@ -3,14 +3,13 @@ import { RestService } from './rest.service';
 import { DataService } from './data.service';
 import { Subject } from 'rxjs';
 import { Action } from '../model/action.model';
-import { Server } from 'http';
-import { ServerResult } from '../model/serverResult.model';
 import { Websocket, WebsocketService } from './websocket.service';
 
 @Injectable()
 export class ActionService {
 
     routingSubject: Subject<string> = new Subject<string>();
+    actionExecutedSubjects: ActionExecutedSubject[] = [];
     actions: Action[] = [];
     websocket: Websocket;
 
@@ -20,12 +19,18 @@ export class ActionService {
 
     public executeAction(action: Action) {
         this._rest.executeAction(action).subscribe(res => {
-
+            if (res.Error != ''){
+                console.error(res.Error)
+                return
+            }
+            if (this.actionExecutedSubjects.find(actionExecutedSubject => action.Name === actionExecutedSubject.name)) {
+                this.actionExecutedSubjects.find(actionExecutedSubject => action.Name === actionExecutedSubject.name).actionExecutedSubject.next(true)
+            }
             let serverActions = res.Actions.filter(action => {
                 return action.Execute === 'Server'
             });
             this.setNewActionsAfterResult(res.ActionIds, serverActions)
-            
+
             let clientActions = res.Actions.filter(action => {
                 return action.Execute === 'Client'
             });
@@ -35,16 +40,17 @@ export class ActionService {
         });
     }
 
-    private setNewActionsAfterResult(actionIds: string[], serverActions: Action[]){
+    private setNewActionsAfterResult(actionIds: string[], serverActions: Action[]) {
         let currentActions: Action[] = []
         currentActions = this.actions.filter(action => {
             return actionIds.includes(action.Id);
         });
         serverActions.forEach(action => {
-            let oldAction = currentActions.find(currentAction => (action.Id === currentAction.Id));
+            let oldAction = currentActions.find(currentAction => (action.Id === currentAction.Id || action.Name === currentAction.Name));;
             if (oldAction) {
                 oldAction = action;
             } else {
+                this.actionExecutedSubjects.push(new ActionExecutedSubject(action.Name));
                 currentActions.push(action);
             }
         });
@@ -89,11 +95,22 @@ export class ActionService {
 
     private setActionBindingValue(binding: string, input: string) {
         let name = binding.split('.')[1];
-        let object = this.actions.find(a => a.Name === name).Input
+        let object = this.actions.find(a => a.Name === name).Input;
         for (let counter = 2; counter < binding.split('.').length - 1; counter++) {
-            object = object[binding.split('.')[counter]];
+            if (binding.split('.')[counter].includes('(')) {
+                let values = binding.split('.')[counter].replace('(', '').replace(')', '').split('=');
+                let counter2 = 0;
+                while (object[counter2]) {
+                    if (object[counter2][values[0]] + '' === values[1] + '') {
+                        object = object[counter2];
+                    }
+                    counter2++;
+                }
+            } else {
+                object = object[binding.split('.')[counter]];
+            }
         }
-        object[binding.split('.')[binding.split('.').length - 1]] = input;
+        object[binding.split('.')[binding.split('.').length - 1]] = JSON.parse(JSON.stringify(input));
     }
 
     runAction(actionName: string): void {
@@ -102,7 +119,8 @@ export class ActionService {
     }
 
     private handleAction(clientAction: Action) {
-        switch (clientAction.Type) {
+        console.log(clientAction, 'ooo');
+        switch (clientAction.Name) {
             case 'DeleteActionInClientAction':
                 break;
             case 'ChangeRouteClientAction':
@@ -117,13 +135,22 @@ export class ActionService {
             case 'ClearDataClientActoin':
                 this.dataService.data = [];
                 break;
-            case 'InitializeWebsocketClientAction':
-                this.websocket.connect(clientAction.Input.Path);
-                this.websocket.sendRequest(localStorage.getItem('Token'));
-                break;
             default:
                 break;
         }
     }
 
+    getActionExecutedSubjectByName(name: string) {
+
+        return this.actionExecutedSubjects.find(action => action.name === name)
+    }
+}
+
+class ActionExecutedSubject {
+    name = ''
+    actionExecutedSubject: Subject<boolean> = new Subject<boolean>();
+
+    constructor(name: string) {
+        this.name = name
+    }
 }

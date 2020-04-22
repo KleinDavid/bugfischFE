@@ -1,0 +1,71 @@
+<div id="atled-layout-designer-menu-right">
+    <div class="menu-right-inner-title">
+        <div>
+            <mat-icon class="menu-right-title-icon">crop_landscape</mat-icon>
+            <div class="menu-right-title">{{getValue('typeName')}}</div>
+        </div>
+    </div>
+    <div class="menu-properties menu-right-inner" fxFlex>
+
+        <div fxLayout="column" style="padding-bottom: 12px; padding-top: 6px">
+            <div *ngIf="getValue('typeName') == 'Bild'" style="padding-bottom: 12px; margin-top: -3px">
+                <mat-radio-group (change)="setValue('imagePosition', $event.value)" [value]="getValue('imagePosition')" aria-label="Select an option">
+                    <div fxLayout="column">
+                        <div class="radio" fxFlex>
+                            <mat-radio-button [value]="imagePositions.Center">Zentrieren</mat-radio-button>
+                        </div>
+                        <div class="radio" fxFlex>
+                            <mat-radio-button [value]="imagePositions.Adapt">Anpassen</mat-radio-button>
+                        </div>
+                        <div class="radio" fxFlex>
+                            <mat-radio-button [value]="imagePositions.AdaptWidht">Höhe beschneiden</mat-radio-button>
+                        </div>
+                        <div class="radio" fxFlex>
+                            <mat-radio-button [value]="imagePositions.AdaptHeight">Breite beschneiden</mat-radio-button>
+                        </div>
+                    </div>
+                </mat-radio-group>
+            </div>
+            <div *ngFor="let valueName of getEditableValuesOfSelectetObject()" fxFlex class="$valueInput">
+                <ng-container
+                    *ngIf="!(valueName == 'backgroundColor' || valueName == 'borderColor') && getValueType(valueName) == 'number'">
+                    <mat-form-field style="width: 100%">
+                        <mat-label>{{valueName}}</mat-label>
+                        <input type="number" autocomplete="off" matInput [placeholder]="valueName" (input)="setInput()"
+                            [value]="getValue(valueName)" (focusout)="setValue(valueName, $event.target.value)"
+                            (keyup)="checkEnterPress($event.code, valueName, $event.target.value)">
+                    </mat-form-field>
+                </ng-container>
+                <ng-container
+                    *ngIf="!(valueName == 'backgroundColor' || valueName == 'borderColor') && getValueType(valueName) == 'string'">
+                    <mat-form-field style="width: 100%">
+                        <mat-label>{{valueName}}</mat-label>
+                        <input autocomplete="off" matInput [placeholder]="valueName" (input)="setInput()"
+                            [value]="getValue(valueName)" (focusout)="setValue(valueName, $event.target.value)"
+                            (keyup)="checkEnterPress($event.code, valueName, $event.target.value)">
+                    </mat-form-field>
+                </ng-container>
+                <ng-container *ngIf="(valueName == 'backgroundColor' || valueName == 'borderColor')">
+                    <div fxLayout="row">
+                        <div fxFlex>
+                            <mat-form-field style="width: 100%">
+                                <mat-label>{{valueName}}</mat-label>
+                                <input matInput [colorPicker]="getPropertyByValueName(valueName)"
+                                    [cpDisableInput]="false" [cpAlphaChannel]="'disabled'" [cpOutputFormat]="'hex'"
+                                    [cpFallbackColor]="'#111111'" [cpPosition]="'bottom'" [cpDialogDisplay]=""
+                                    [cpWidth]="getColorPickerWidth() + 'px'" [cpCloseClickOutside]="true"
+                                    [cpSaveClickOutside]="true" [value]="getValue(valueName)"
+                                    (colorPickerClose)="setValue(valueName, colors[valueName])"
+                                    (colorPickerChange)="colorChanged(valueName, $event)"
+                                    (keyup)="checkEnterPress($event.code, valueName, $event.target.value)" />
+                            </mat-form-field>
+                        </div>
+                        <div fxFlex="20px">
+                            <div [style.backgroundColor]="getValue(valueName)" style="width: 100%; height: 38px; margin-top: -8px"></div>
+                        </div>
+                    </div>
+                </ng-container>
+            </div>
+        </div>
+    </div>
+</div>

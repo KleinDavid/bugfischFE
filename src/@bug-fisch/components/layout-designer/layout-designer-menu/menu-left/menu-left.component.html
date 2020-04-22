@@ -1,0 +1,22 @@
+<div id="atled-layout-designer-menu-left">
+    <div class="menu-left">
+        <div fxLayout="column">
+            <img id="menu-left-icon0" class="menu-left-icon" fxFlex (click)="clickMenu(0)"
+                [ngClass]="checkEditMode(0) ? 'menu-left-icon-active' : ''" src="assets/icons/mouseArrow.png">
+            <!--<mat-icon id="menu-left-icon0" class="menu-left-icon" (click)="clickMenu(0)"
+                [ngClass]="checkEditMode(0) ? 'menu-left-icon-active' : ''">u</mat-icon>-->
+            <mat-icon id="menu-left-icon1" class="menu-left-icon" (click)="clickMenu(1)" fxFlex
+                [ngClass]="checkEditMode(1) ? 'menu-left-icon-active' : ''">crop_landscape</mat-icon>
+            <mat-icon id="menu-left-icon2" class="menu-left-icon" (click)="clickMenu(2)" fxFlex
+                [ngClass]="checkEditMode(2) ? 'menu-left-icon-active' : ''">radio_button_unchecked</mat-icon>
+            <mat-icon id="menu-left-icon3" class="menu-left-icon" (click)="clickMenu(3)" fxFlex
+                [ngClass]="checkEditMode(3) ? 'menu-left-icon-active' : ''">title</mat-icon>
+            <mat-icon id="menu-left-icon4" class="menu-left-icon" (click)="clickMenu(4)" fxFlex
+                [ngClass]="checkEditMode(4) ? 'menu-left-icon-active' : ''">crop_original</mat-icon>
+            <mat-icon id="menu-left-icon5" class="menu-left-icon" (click)="clickMenu(5)" fxFlex
+                [ngClass]="checkEditMode(5) ? 'menu-left-icon-active' : ''">edit</mat-icon>
+            <mat-icon id="menu-left-icon6" class="menu-left-icon" (click)="clickMenu(6)" fxFlex
+                [ngClass]="checkEditMode(6) ? 'menu-left-icon-active' : ''">timeline</mat-icon>
+        </div>
+    </div>
+</div>

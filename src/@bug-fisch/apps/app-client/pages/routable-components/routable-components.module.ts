@@ -3,6 +3,9 @@ import { LoginModule } from './login/login.module';
 import { AskQuestionModule } from './question-box/ask-question/ask-question.module';
 import { ShowQuestionsModule } from './question-box/show-questions/show-questions.module';
 import { SurveyWellcomeModule } from './survey/survey-wellcome/survey-wellcome.module';
+import { SurveyQuestionModule } from './survey/survey-question/survey-question.module';
+import { SurveyEndModule } from './survey/survey-end/survey-end.module';
+import { PredigtStartseiteModule } from './predigt/predigt-startseite/predigt-startseite.module';
 
 
 @NgModule({
@@ -10,7 +13,10 @@ import { SurveyWellcomeModule } from './survey/survey-wellcome/survey-wellcome.m
         AskQuestionModule,
         LoginModule,
         ShowQuestionsModule,
-        SurveyWellcomeModule
+        SurveyWellcomeModule,
+        SurveyQuestionModule,
+        SurveyEndModule,
+        PredigtStartseiteModule
     ]
 })
 export class RoutableComponentsModule { }

@@ -1,1 +1,9 @@
-<button mat-button (click)="onClick()">{{text}}</button>
+<ng-container *ngIf="styleType == '0'">
+    <button mat-button (click)="onClick()">{{text}}</button>
+</ng-container>
+
+<ng-container *ngIf="styleType == '1'">
+    <div (click)="onClick()">
+        <button id="os" class="submitbutton" type="submit" name="submit_button" value="" title="Weiter"><span>{{text}}</span></button>
+    </div>
+</ng-container>

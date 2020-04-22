@@ -1,0 +1,61 @@
+#atled-layout-designer-menu-right {
+  background-color: #e5e5e5;
+  height: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+  .menu-properties {
+    overflow-y: scroll;
+    flex: 1 1 auto;
+  }
+
+  .menu-right-inner {
+    width: 100%;
+    padding: 24px;
+  }
+
+  .radio {
+    padding-bottom: 12px;
+  }
+
+  ::ng-deep .mat-form-field-flex > .mat-form-field-infix {
+    padding: 0.4em 0px !important;
+  }
+  ::ng-deep .mat-form-field-label-wrapper {
+    top: -14px;
+  }
+
+  ::ng-deep .mat-form-field-appearance-legacy .mat-form-field-wrapper{
+    margin-top: -8px;
+    padding-bottom: 15px;
+  }
+
+  ::ng-deep
+    .mat-form-field-appearance-outline.mat-form-field-can-float.mat-form-field-should-float
+    .mat-form-field-label {
+    transform: translateY(-1.1em) scale(0.75);
+    width: 133.33333%;
+  }
+
+  .menu-right-inner-title {
+    background-color: #dcdcdc;
+    width: 100%;
+    padding: 24px;
+
+    .menu-right-title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-left: 12px;
+      padding-top: 2px;
+      float: left;
+    }
+
+    .menu-right-title-icon {
+      float: left;
+      width: 36px;
+      height: 36px;
+      font-size: 36px;
+    }
+  }
+}

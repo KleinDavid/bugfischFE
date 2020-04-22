@@ -6,7 +6,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 @NgModule({
     imports:[
         CommonModule,
-        FlexLayoutModule 
+        FlexLayoutModule
     ],
     exports:[
         CommonModule,

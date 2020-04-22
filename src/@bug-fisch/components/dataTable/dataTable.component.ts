@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ActionService } from 'src/@bug-fisch/services/action.service';
 import { DataService } from 'src/@bug-fisch/services/data.service';
-import { MatTableDataSource } from '@angular/material';
+import { MatTableDataSource } from '@angular/material/table';
 import { MediaObserver, MediaChange } from '@angular/flex-layout';
 import { Subscription } from 'rxjs';
 
@@ -31,7 +31,6 @@ export class DataTableComponent implements OnInit {
     this.flexMediaWatcher = mediaObserver.media$.subscribe((change: MediaChange) => {
       if (change.mqAlias !== this.currentScreenWidth) {
         this.currentScreenWidth = change.mqAlias;
-        console.log(this.currentScreenWidth);
         this.getDispayedColumns();
       }
     });

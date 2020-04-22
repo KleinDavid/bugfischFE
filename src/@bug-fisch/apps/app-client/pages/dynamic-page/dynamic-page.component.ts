@@ -1,6 +1,13 @@
 import { Component, OnInit, ChangeDetectorRef, ComponentFactoryResolver, Type, ViewContainerRef, ViewChild, AfterViewChecked, AfterViewInit } from '@angular/core';
 import { ActionService } from 'src/@bug-fisch/services/action.service';
 import { Action } from 'src/@bug-fisch/model/action.model';
+import { LoginComponent } from '../routable-components/login/login.component';
+import { AskQuestionComponent } from '../routable-components/question-box/ask-question/ask-question.component';
+import { ShowQuestionsComponent } from '../routable-components/question-box/show-questions/show-questions.component';
+import { SurveyWellcomeComponent } from '../routable-components/survey/survey-wellcome/survey-wellcome.component';
+import { SurveyQuestionComponent } from '../routable-components/survey/survey-question/survey-question.component';
+import { SurveyEndComponent } from '../routable-components/survey/survey-end/survey-end.component';
+import { PredigtStartseiteComponent } from '../routable-components/predigt/predigt-startseite/predigt-startseite.component';
 
 
 @Component({
@@ -10,7 +17,7 @@ import { Action } from 'src/@bug-fisch/model/action.model';
 })
 export class DynamicPageComponent implements OnInit, AfterViewInit {
 
-  @ViewChild('viewContainerRef', { read: ViewContainerRef, static: false }) viewContainerRef: ViewContainerRef;
+  @ViewChild('viewContainerRef', { read: ViewContainerRef }) viewContainerRef: ViewContainerRef;
 
   public standardComponents: {
     componentName: string,
@@ -28,7 +35,34 @@ export class DynamicPageComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.loadStadardComponents();
-    this.actionService.routingSubject.subscribe(res => this.createComponentByName(res));
+    // this.actionService.routingSubject.subscribe(res => this.createComponentByName(res));
+    this.actionService.routingSubject.subscribe(res => {
+      switch (res) {
+        case 'LoginComponent':
+          this.loadComponent(LoginComponent);
+          break;
+        case 'AskQuestionComponent':
+          this.loadComponent(AskQuestionComponent);
+          break;
+        case 'ShowQuestionsComponent':
+          this.loadComponent(ShowQuestionsComponent);
+          break;
+        case 'SurveyWellcomeComponent':
+          this.loadComponent(SurveyWellcomeComponent);
+          break;
+        case 'SurveyEndComponent':
+          this.loadComponent(SurveyEndComponent);
+          break;
+        case 'SurveyQuestionComponent':
+          this.loadComponent(SurveyQuestionComponent);
+          break;
+        case 'PredigtStartseiteComponent':
+          this.loadComponent(PredigtStartseiteComponent);
+        default:
+          break;
+      }
+
+    });
   }
 
   ngAfterViewInit(): void {
@@ -47,8 +81,8 @@ export class DynamicPageComponent implements OnInit, AfterViewInit {
   }
 
   loadStadardComponents(): void {
-    console.log(this.componentFactoryResolver)
-    const moduleRefList = this.componentFactoryResolver['_ngModule']['_def']['modules']
+    /*console.log(this.componentFactoryResolver)
+    const moduleRefList = this.componentFactoryResolver['ngModule']['_def']['modules']
       .find((x: any) => x.name === 'RoutableComponentsModule')['__annotations__'][0]['imports'];
     moduleRefList.forEach((moduleRef: any) => {
       if (moduleRef['__annotations__'] !== undefined) {
@@ -60,7 +94,8 @@ export class DynamicPageComponent implements OnInit, AfterViewInit {
           }
         }
       }
-    });
+    });*/
+    document.getElementById('dynampic-div').innerHTML = '<app-login></app-login>'
   }
 
   pushComponent(factoryClass: any): void {
@@ -95,5 +130,12 @@ export class DynamicPageComponent implements OnInit, AfterViewInit {
     component.innerHtml = element.outerHTML;
     component.style = element.style;
     this.changeDetectRef.detectChanges();
+  }
+
+  loadComponent(component: any) {
+    const factory = this.componentFactoryResolver.resolveComponentFactory(component);
+    this.viewContainerRef.clear()
+    const ref = this.viewContainerRef.createComponent(factory);
+    ref.changeDetectorRef.detectChanges();
   }
 }

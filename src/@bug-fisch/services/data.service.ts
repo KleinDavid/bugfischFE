@@ -10,7 +10,6 @@ export class DataService {
     constructor() { }
 
     setData(data: any) {
-        console.log(data)
         let dataPackage = this.data.find(ob => {
             if (ob.DataPackage) {
                 return ob.DataPackage.Name === data.DataPackage.Name;
@@ -18,16 +17,10 @@ export class DataService {
             return false;
         });
         if (dataPackage) {
-            console.log('erst', dataPackage);
             dataPackage.DataPackage.Data = data.DataPackage.Data;
-            
-            console.log('dann', dataPackage);
         } else {
             this.data.push(data);
         }
-
-        console.log(this.data);
-
         let subjectWithDataPackageName = this.subjectsWithDataPackageName.find(ob => {
             return ob.dataPackageName == data.DataPackage.Name;
         });

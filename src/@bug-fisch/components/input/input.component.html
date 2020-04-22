@@ -1,5 +1,5 @@
 <mat-form-field>
-    <input *ngIf="!textbox" type="password" autocomplete="off" matInput [placeholder]="text" (input)="setInput($event.target.value)" [value]="inputValue">
+    <input *ngIf="!textbox" autocomplete="off" matInput [placeholder]="text" (input)="setInput($event.target.value)" [value]="inputValue">
     <textarea rows="8" *ngIf="textbox" matInput
         [placeholder]="text" (input)="setInput($event.target.value)" [value]="inputValue">
     </textarea>
