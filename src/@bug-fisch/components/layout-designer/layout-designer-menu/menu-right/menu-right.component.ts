@@ -1,5 +1,5 @@
 import { Component, Output, EventEmitter, OnInit, Input } from '@angular/core';
-import { LayoutDesignerlCreationMode, LayoutDesignerImagePosition } from '../../layout-designer-objects/Enums';import { TransformableObject } from '../../layout-designer-objects/TransformableObject';
+import { LayoutDesignerlCreationMode, LayoutDesignerImagePosition } from '../../layout-designer-objects/Enums';import { TransformableObject } from '../../layout-designer-objects/RenderableObjects/TransformableObject';
 ;
 
 

@@ -1,4 +1,4 @@
-import { RenderableObject } from "./RenderableObject";
+import { RenderableObject } from "../RenderableObject";
 
 export class TransformRect extends RenderableObject {
     backgroundColor = '#91a3b0';

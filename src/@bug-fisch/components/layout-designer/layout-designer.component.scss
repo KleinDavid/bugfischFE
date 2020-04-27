@@ -13,8 +13,10 @@
 
   .layout-desinger {
     background-color: white;
+    overflow: scroll;
     width: 100%;
     height: 100%;
+    position: relative;
 
     #atled-layout-designer-chipcard {
       border: 3px dotted black;

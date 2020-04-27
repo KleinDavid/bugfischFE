@@ -1,5 +1,5 @@
-import { TransformableObject } from "./TransformableObject";
-import { EditField } from './EditField';
+import { TransformableObject } from "../TransformableObject";
+import { EditField } from '../EditField';
 
 export class Rect extends TransformableObject {
     backgroundColor = '#8a7f8d';

@@ -1,8 +1,8 @@
-import { TransformableObject } from "./TransformableObject";
-import { LayoutDesignerlEditMode } from './Enums';
-import { EditField } from './EditField';
-import { TransformRect } from './TransformRect';
-import { Position } from './Position';
+import { TransformableObject } from "../TransformableObject";
+import { LayoutDesignerlEditMode } from '../../Enums';
+import { EditField } from '../EditField';
+import { TransformRect } from '../TransformRect';
+import { Position } from '../../Position';
 
 export class SelectionWrapper extends TransformableObject {
   borderWidth = 1;
@@ -29,7 +29,12 @@ export class SelectionWrapper extends TransformableObject {
     super.delete();
   }
 
-  unselect() {
+  select(): void{
+    this.deleteState = false;
+    super.select();
+  }
+
+  unselect(): void {
     this.deleteState = true;
     super.unselect();
   }
@@ -63,23 +68,23 @@ export class SelectionWrapper extends TransformableObject {
         topLeft = new Position(o.position.x, o.position.y);
       }
       if (!bottomRight) {
-        bottomRight = new Position(o.getBottomRightWidhtBorderIndex().x, o.getBottomRightWidhtBorderIndex().y);
-        this.borderIndexX = (o.borderWidth % 4) > 0 ? 0 : 1;
-        this.borderIndexY = (o.borderWidth % 4) > 0 ? 0 : 1;
+        bottomRight = new Position(o.getBottomRight().x, o.getBottomRight().y);
+        this.borderIndexX = (o.borderWidth % 4) > 0 ? 1 : 0;
+        this.borderIndexY = (o.borderWidth % 4) > 0 ? 1 : 0;
       }
       if (o.position.x < topLeft.x) {
         topLeft.x = o.position.x;
-        this.borderIndexX = (o.borderWidth % 4) > 0 ? 0 : 1;
+        this.borderIndexX = (o.borderWidth % 4) > 0 ? 1 : 0;
       }
       if (o.position.y < topLeft.y) {
         topLeft.y = o.position.y;
-        this.borderIndexY = (o.borderWidth % 4) > 0 ? 0 : 1;
+        this.borderIndexY = (o.borderWidth % 4) > 0 ? 1 : 0;
       }
-      if (o.getBottomRightWidhtBorderIndex().x > bottomRight.x) {
-        bottomRight.x = o.getBottomRightWidhtBorderIndex().x;
+      if (o.getBottomRight().x > bottomRight.x) {
+        bottomRight.x = o.getBottomRight().x;
       }
-      if (o.getBottomRightWidhtBorderIndex().y > bottomRight.y) {
-        bottomRight.y = o.getBottomRightWidhtBorderIndex().y;
+      if (o.getBottomRight().y > bottomRight.y) {
+        bottomRight.y = o.getBottomRight().y;
       }
     }
     if (!topLeft || !bottomRight || this.selectedObjects.length === 0) {
@@ -87,6 +92,7 @@ export class SelectionWrapper extends TransformableObject {
       super.editEnd();
       return;
     }
+    console.log(this)
 
     this.position = topLeft;
     this.width = bottomRight.x - topLeft.x;
@@ -109,12 +115,10 @@ export class SelectionWrapper extends TransformableObject {
     this.createTransformRects();
   }
 
-  render(): string {
-    this.borderIndexX = 0;
-    this.borderIndexY = 0;
+  getHTML(): string {
     this.width -= (1 + this.borderIndexX);
     this.height -= (1 + this.borderIndexY);
-    let returnValue = super.render();
+    let returnValue = super.getHTML();
     this.width += (1 + this.borderIndexX);
     this.height += (1 + this.borderIndexY);
     return returnValue;
@@ -169,46 +173,6 @@ export class SelectionWrapper extends TransformableObject {
         o.position.x += x;
         o.position.y += y;
         o.editEnd()
-        // o.transform(new Position(position.x / (this.width / o.width), position.y / (this.height / o.height)));
-
-        /*if (this.width <= 1 || this.height <= 1) {
-          super.transform(position);
-          return;
-        }
-        let moveXRight = (((this.width + position.x) * (o.position.x - this.position.x)) / this.width) - (o.position.x - this.position.x);
-        let moveYDown = (((this.height + position.y) * (o.position.y - this.position.y)) / this.height) - (o.position.y - this.position.y);
- 
-        let moveXLeft = -((((this.width - position.x) * (this.getTopRight().x - o.getTopRight().x)) / this.width) - (this.getTopRight().x - o.getTopRight().x));
-        let moveYUp = -((((this.height - position.y) * (this.getBottomRight().y - o.getBottomRight().y)) / this.height) - (this.getBottomRight().y - o.getBottomRight().y));
- 
-        switch (this.editMode) {
-          case LayoutDesignerlEditMode.Resize1:
-            o.moveByDifference(new Position(moveXLeft, moveYUp));
-            break;
-          case LayoutDesignerlEditMode.Resize2:
-            o.moveByDifference(new Position(0, moveYUp));
-            break;
-          case LayoutDesignerlEditMode.Resize3:
-            o.moveByDifference(new Position(moveXRight, moveYUp));
-            break;
-          case LayoutDesignerlEditMode.Resize4:
-            o.moveByDifference(new Position(moveXRight, 0));
-            break;
-          case LayoutDesignerlEditMode.Resize5:
-            o.moveByDifference(new Position(moveXRight, moveYDown));
-            break;
-          case LayoutDesignerlEditMode.Resize6:
-            o.moveByDifference(new Position(0, moveYDown));
-            break;
-          case LayoutDesignerlEditMode.Resize7:
-            o.moveByDifference(new Position(moveXLeft, moveYDown));
-            break;
-          case LayoutDesignerlEditMode.Resize8:
-            o.moveByDifference(new Position(moveXLeft, 0));
-            break;
-          default:
-            break;
-        }*/
       }
     });
   }

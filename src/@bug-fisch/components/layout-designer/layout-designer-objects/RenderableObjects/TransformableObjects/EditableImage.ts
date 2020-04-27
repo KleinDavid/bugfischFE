@@ -1,7 +1,8 @@
-import { LayoutDesignerImagePosition } from "./Enums";
-import { TransformableObject } from './TransformableObject';
-import { IdCard } from './IdCard';
-import { EditField } from './EditField';
+
+import { TransformableObject } from '../TransformableObject';
+import { IdCard } from '../IdCard';
+import { EditField } from '../EditField';
+import { LayoutDesignerImagePosition } from '../../Enums';
 
 export class EditableImage extends TransformableObject {
     imageSrcBase64: string = '';
@@ -41,7 +42,7 @@ export class EditableImage extends TransformableObject {
   
     }
   
-    render(): string {
+    getHTML(): string {
       let div = document.createElement('div');
   
       div.style.position = 'absolute';
@@ -95,7 +96,7 @@ export class EditableImage extends TransformableObject {
         let resString = div.outerHTML;
   
         this.transformRects.forEach(rect => {
-          resString += rect.render();
+          resString += rect.getHTML();
         })
         return resString;
       }

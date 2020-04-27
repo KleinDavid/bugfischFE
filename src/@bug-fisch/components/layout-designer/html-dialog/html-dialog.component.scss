@@ -1,0 +1,78 @@
+.full-width-dialog .mat-dialog-container {
+  position: absolute;
+  width: 98vw !important;
+  height: 96vh !important;
+  left: 1vw !important;
+  top: 2vh !important;
+  overflow: hidden;
+}
+
+.mat-dialog-container {
+  padding: 0;
+
+  .mat-toolbar {
+    flex: 1 0 auto;
+    min-height: initial;
+  }
+}
+
+#workflow-bpmn-modeler-dialog {
+  .modeler-content {
+    min-height: 96vh !important;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+
+    .header {
+      max-height: 65px;
+    }
+
+    .main {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+
+      .xml-inner {
+        min-height: 0;
+        margin-top: 16px;
+        margin-left: 16px;
+        margin-right: 16px;
+        margin-bottom: 0;
+
+        max-height: calc(100% - 16px) !important;
+        min-width: calc(100% - 32px) !important;
+        max-width: calc(100% - 32px) !important;
+
+        position: absolute;
+        overflow: scroll;
+
+        .space-around {
+          margin-top: 10px;
+          margin-left: 10px;
+          margin-right: 10px;
+          margin-bottom: 10px;
+
+          .line-numbers {
+            width: 2%;
+            float: left;
+            color: rgb(224, 224, 224);
+          }
+
+          .editor {
+            width: 98%;
+            float: right;
+          }
+        }
+      }
+    }
+
+    .footer {
+      height: auto;
+    }
+  }
+
+  .full-height {
+    height: 100%;
+  }
+}

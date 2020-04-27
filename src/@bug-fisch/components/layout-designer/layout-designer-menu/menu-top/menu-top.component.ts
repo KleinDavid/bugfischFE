@@ -10,6 +10,7 @@ import { LayoutDesignerlCreationMode } from '../../layout-designer-objects/Enums
 export class LayoutDesignerMenuTopComponent implements OnInit {
   
   @Input() currentCreationMode: LayoutDesignerlCreationMode = LayoutDesignerlCreationMode.None;
+  @Output() onChange: EventEmitter<LayoutDesignerlCreationMode> = new EventEmitter();
 
   constructor() {
   }
@@ -18,9 +19,6 @@ export class LayoutDesignerMenuTopComponent implements OnInit {
   }
 
   clickMenu(btnNumber: number) {
-  }
-
-  checkEditMode(btnNumber: number) {
-    return btnNumber === this.currentCreationMode;
+    this.onChange.emit();
   }
 }

@@ -1,0 +1,16 @@
+<div id="workflow-bpmn-modeler-dialog">
+    <div class="modeler-content">
+        <div class="main" id="group">
+            <div class="xml-inner fuse-card auto-width">
+                <div class="space-around" fxLayout="row">
+                    <div fxFlex="2" class="line-numbers">
+                        <div *ngFor="let i of xmlLineNumbers">{{i}}</div>
+                    </div>
+                    <textarea fxFlex="98" class="editor" [value]="xmlContent" id="editor_area" (keyup)="updateXmlLineNumbers()" wrap="off"
+                        style="overflow: hidden" spellcheck="false" matInput matTextareaAutosize matAutosizeMinRows=1
+                        ></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

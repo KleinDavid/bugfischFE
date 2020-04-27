@@ -13,6 +13,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
 import { LayoutDesignerMenuModule } from './layout-designer-menu/layout-designer-menu.module';
 import { LayoutDesignerComponent } from './layout-designer.component';
+import { HTMLDialog } from './html-dialog/html-dialog.component';
+import { MatDialogModule } from '@angular/material/dialog';
 
 @NgModule({
     imports: [
@@ -23,6 +25,7 @@ import { LayoutDesignerComponent } from './layout-designer.component';
         MatSortModule,
         MatProgressSpinnerModule,
         MatIconModule,
+        MatDialogModule,
         YouTubePlayerModule,
         LayoutDesignerMenuModule,
 
@@ -33,10 +36,12 @@ import { LayoutDesignerComponent } from './layout-designer.component';
     ],
     declarations: [
         LayoutDesignerComponent,
+        HTMLDialog
     ],
     exports: [
         LayoutDesignerComponent,
-        LayoutDesignerMenuModule
+        LayoutDesignerMenuModule,
+        HTMLDialog
     ]
 })
 

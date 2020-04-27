@@ -1,5 +1,5 @@
-import { TransformableObject } from './TransformableObject';
-import { EditField } from './EditField';
+import { TransformableObject } from '../TransformableObject';
+import { EditField } from '../EditField';
 
 export class Circle extends TransformableObject {
     backgroundColor = '#8a7f8d';
@@ -11,7 +11,7 @@ export class Circle extends TransformableObject {
         this.editableProperties.concat([]);
     }
 
-    render(): string {
+    getHTML(): string {
         let div = document.createElement('div');
 
         div.style.position = 'absolute';
@@ -47,7 +47,7 @@ export class Circle extends TransformableObject {
             let resString = div.outerHTML;
 
             this.transformRects.forEach(rect => {
-                resString += rect.render();
+                resString += rect.getHTML();
             })
             return resString;
         }
