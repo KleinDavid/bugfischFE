@@ -320,7 +320,7 @@ abstract class RenderableObject {
   borderColor: string = 'black';
   cursor: string = 'default';
   backgroundColor = 'none';
-  borderType: string = 'solid';
+  borderStyle: string = 'solid';
   zIndex: number = 0;
 
   cornerRectSize = 11;
@@ -343,7 +343,7 @@ abstract class RenderableObject {
     div.style.width = this.width + 'px';
     div.style.top = this.position.y + 'px';
     div.style.left = this.position.x + 'px';
-    div.style.border = this.borderWidth + 'px ' + this.borderType + ' ' + this.borderColor;
+    div.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
     div.style.borderRadius = this.borderRadius + 'px';
     div.style.cursor = this.cursor;
     div.style.backgroundColor = this.backgroundColor;
@@ -401,7 +401,7 @@ export class TransformableObject extends RenderableObject {
 
   id: string;
   editMode: LayoutDesignerlEditMode = LayoutDesignerlEditMode.None;
-  editableProperties: string[] = ['position.x', 'position.y', 'width', 'height', 'borderColor', 'borderWidth', 'borderType', 'borderRadius', 'backgroundColor'];
+  editableProperties: string[] = ['position.x', 'position.y', 'width', 'height', 'borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'backgroundColor'];
   editField: EditField;
   typeName: string = '';
 
@@ -453,7 +453,7 @@ export class TransformableObject extends RenderableObject {
     div.style.borderRadius = this.borderRadius + 'px';
     div.style.cursor = this.cursor;
     div.style.backgroundColor = this.backgroundColor;
-    div.style.border = this.borderWidth + 'px ' + this.borderType + ' ' + this.borderColor;
+    div.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
     div.id = this.id;
 
     if (this.selected) {
@@ -710,7 +710,7 @@ export class TransformableObject extends RenderableObject {
 class SelectionWrapper extends TransformableObject {
   borderWidth = 1;
   selectetObjects: TransformableObject[] = [];
-  borderType = 'dashed';
+  borderStyle = 'dashed';
   allTransformableObjects: TransformableObject[] = [];
   selectedObjects: TransformableObject[] = [];
   editableProperties = [];
@@ -1037,7 +1037,7 @@ class EditableImage extends TransformableObject {
     div.style.borderRadius = this.borderRadius + 'px';
     div.style.cursor = this.cursor;
     div.style.backgroundColor = this.backgroundColor;
-    div.style.border = this.borderWidth + 'px ' + this.borderType + ' ' + this.borderColor;
+    div.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
     div.id = this.id;
 
     // fill height

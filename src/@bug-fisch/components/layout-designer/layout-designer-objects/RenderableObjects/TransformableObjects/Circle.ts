@@ -2,6 +2,8 @@ import { TransformableObject } from '../TransformableObject';
 import { EditField } from '../EditField';
 
 export class Circle extends TransformableObject {
+    icon: string = 'radio_button_unchecked';
+    type = 'Circle'
     backgroundColor = '#8a7f8d';
     typeName = 'Kreis';
     editableProperties = ['position.x', 'position.y', 'height', 'width', 'borderWidth', 'borderColor', 'backgroundColor']
@@ -20,6 +22,7 @@ export class Circle extends TransformableObject {
         div.style.width = (this.width + this.borderWidth * 2) + 'px';
         div.style.top = this.position.y + 'px';
         div.style.left = this.position.x + 'px';
+        div.style.zIndex = this.zIndex + '';
 
         div.style.cursor = this.cursor;
         div.id = this.id;
@@ -52,5 +55,15 @@ export class Circle extends TransformableObject {
             return resString;
         }
         return div.outerHTML;
+    }
+
+    getCopy(): Circle {
+        let copyedObject: Circle = new Circle('', this.editField);
+        for (let key in this) {
+            if (key !== 'changedSubject') {
+                copyedObject[key.toString()] = JSON.parse(JSON.stringify(this[key]));
+            }
+        }
+        return copyedObject;
     }
 }

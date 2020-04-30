@@ -8,6 +8,7 @@ import { Position } from './layout-designer-objects/Position';
 import { EditField } from './layout-designer-objects/RenderableObjects/EditField';
 import { EditableImage } from './layout-designer-objects/RenderableObjects/TransformableObjects/EditableImage';
 import { Circle } from './layout-designer-objects/RenderableObjects/TransformableObjects/Circle';
+import { TextField } from './layout-designer-objects/RenderableObjects/TransformableObjects/TextField';
 import { RenderableObject } from './layout-designer-objects/RenderableObject';
 import { HTMLDialog } from './html-dialog/html-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -24,53 +25,12 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
   @HostListener('window:click', ['$event'])
   mouseClickEvent(event: MouseEvent) {
-    if (!this.mouseIsDown) {
-      return;
-    }
-
-    // onMouseup
-    if (event.clientX !== this.mouseDownPosition.x || event.clientY !== this.mouseDownPosition.y) {
-      this.currentCreationMode = LayoutDesignerlCreationMode.None;
-      this.droped = true;
-      this.selectedObject.editEnd();
-      this.render();
-    }
-
-    // onClick
-    else {
-      if (!this.editField.checkIfObjectIsThere(event.clientX, event.clientY)) { console.log('noEdi');return; }
-      if (this.selectedObject) { this.selectedObject.editEnd(); this.render() }
-      if (!this.selectObjectByMouseClick(event.clientX, event.clientY)) { this.selectedObject = null; }
-      else { this.selectedObject.select() };
-      this.render();
-    }
-    this.mouseIsDown = false;
+    this.mouseClickEventHandle(event);
   }
 
   @HostListener('window:keyup', ['$event'])
   keyupEvent(event: KeyboardEvent) {
-    if (event.code === 'Delete' && this.selectedObject) {
-      this.selectedObject.delete();
-      this.listOfTransformableObjects = this.listOfTransformableObjects.filter(ob => !ob.deleteState);
-      this.selectedObject = null;
-      this.render();
-    }
-
-    if (event.code === 'ArrowRight' && this.selectedObject) {
-      this.moveObject(new Position(1, 0));
-    }
-
-    if (event.code === 'ArrowLeft' && this.selectedObject) {
-      this.moveObject(new Position(-1, 0));
-    }
-
-    if (event.code === 'ArrowUp' && this.selectedObject) {
-      this.moveObject(new Position(0, -1));
-    }
-
-    if (event.code === 'ArrowDown' && this.selectedObject) {
-      this.moveObject(new Position(0, 1));
-    }
+    this.keyupEventHandle(event);
   }
 
   @HostListener('window:drag', ['$event'])
@@ -79,6 +39,91 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
   @HostListener('window:mousedown', ['$event'])
   mouseDownEvent(event: MouseEvent) {
+    this.mouseDownEventHandle(event);
+  }
+
+  @HostListener('window:mouseup', ['$event'])
+  mouseUpEvent(event: MouseEvent) {
+    this.mouseClickEvent(event);
+  }
+
+  @HostListener('window:mousemove', ['$event'])
+  mouseMoveEvent(event: MouseEvent) {
+    this.mouseMoveEventHandle(event);
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any) {
+    this.initializeIdCard();
+  }
+
+  mouseIsDown: boolean = false;
+  mouseDownPosition: Position;
+  droped: boolean = false;
+  lastMousePosition: Position = new Position(0, 0)
+  listOfTransformableObjects: TransformableObject[] = []
+
+  selectedObject: TransformableObject;
+  copyedObject: TransformableObject;
+  idCard: IdCard;
+  editField: EditField;
+
+  currentCreationMode: LayoutDesignerlCreationMode = LayoutDesignerlCreationMode.Edit;
+
+  zoomFactor = 0;
+  minZoomFactor = 0;
+  maxZoomFactor = 500;
+  zoomStep = 10;
+
+  defaultRect: Rect;
+  defaultCircle: Circle;
+  defaultTextField: TextField;
+  defaultEditableImage: EditableImage;
+
+  currentDefaultObject: TransformableObject;
+
+  constructor(private htmlDialog: MatDialog) {
+    console.log('d');
+  }
+
+  ngOnInit(): void {
+    this.idCard = new IdCard('idCard', this.editField);
+    this.idCard.setOuterObject(this.idCard);
+
+    this.defaultRect = new Rect('', this.editField);
+    this.defaultCircle = new Circle('', this.editField);
+    this.defaultTextField = new TextField('', this.editField);
+    this.defaultEditableImage = new EditableImage('', this.editField, '', this.idCard);
+
+    this.defaultRect.editableProperties = ['borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'backgroundColor'];
+    this.defaultCircle.editableProperties = ['borderWidth', 'borderColor', 'backgroundColor']
+    this.defaultTextField.editableProperties = ['fontStyle', 'fontVariant', 'fontWeight', 'fontSize', 'fontFamily', 'textAlign', 'verticalAlign'];
+    this.defaultEditableImage.editableProperties = ['borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'backgroundColor'];
+  }
+
+  ngAfterViewInit() {
+    this.initializeIdCard();
+  }
+
+  // init Functions
+  initializeIdCard(): void {
+    let outerStyle = document.getElementById('layout-desinger-space-around').getBoundingClientRect();
+    this.idCard.height = 540 / 2.2;
+    this.idCard.width = 856 / 2.2;
+    this.idCard.position.x = outerStyle.width / 2 - this.idCard.width / 2 + outerStyle.x;
+    this.idCard.position.y = outerStyle.height / 2 - this.idCard.height / 2 + outerStyle.y;
+
+    this.editField = new EditField();
+    this.editField.position.x = outerStyle.x;
+    this.editField.position.y = outerStyle.y;
+    this.editField.height = outerStyle.height;
+    this.editField.width = outerStyle.width
+
+    this.render()
+  }
+
+  // Event Functions
+  mouseDownEventHandle(event: MouseEvent) {
     this.mouseDownPosition = new Position(event.clientX, event.clientY);
     if (!this.editField.checkIfObjectIsThere(event.clientX, event.clientY)) {
       return;
@@ -102,121 +147,85 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
         this.createObject(new Position(event.clientX, event.clientY));
         this.selectedObject.editMode = LayoutDesignerlEditMode.Resize5;
         break;
+      case LayoutDesignerlCreationMode.Text:
+        this.createObject(new Position(event.clientX, event.clientY));
+        this.selectedObject.editMode = LayoutDesignerlEditMode.Resize5;
+        break;
       default:
         break;
     }
   }
 
-  @HostListener('window:mouseup', ['$event'])
-  mouseUpEvent(event: MouseEvent) {
-    this.mouseClickEvent(event);
+  mouseClickEventHandle(event: MouseEvent) {
+    if (!this.mouseIsDown) {
+      return;
+    }
+
+    // onMouseup
+    if (event.clientX !== this.mouseDownPosition.x || event.clientY !== this.mouseDownPosition.y) {
+      this.changeCreationMode(LayoutDesignerlCreationMode.None);
+      this.droped = true;
+      this.selectedObject.editEnd();
+      this.render();
+    }
+
+    // onClick
+    else {
+      if (!this.editField.checkIfObjectIsThere(event.clientX, event.clientY)) { return; }
+      if (this.selectedObject) { this.selectedObject.editEnd(); this.render(); }
+      if (!this.selectObjectByMouseClick(event.clientX, event.clientY)) { this.selectedObject = this.currentDefaultObject; }
+      else { this.selectedObject.select() };
+    }
+    this.mouseIsDown = false;
   }
 
-  @HostListener('window:mousemove', ['$event'])
-  mouseMoveEvent(event: MouseEvent) {
+  mouseMoveEventHandle(event: MouseEvent) {
     if (this.mouseIsDown && this.selectedObject && this.editField.checkIfObjectIsThere(event.clientX, event.clientY)) {
       this.moveObject(this.lastMousePosition.getDifference(new Position(event.clientX, event.clientY)));
       this.lastMousePosition = new Position(event.clientX, event.clientY);
     }
   }
 
-  @HostListener('window:resize', ['$event'])
-  onResize(event: any) {
-    this.initializeIdCard();
-  }
+  private keyupEventHandle(event: KeyboardEvent) {
 
-  mouseIsDown: boolean = false;
-  mouseDownPosition: Position;
-  droped: boolean = false;
-  lastMousePosition: Position = new Position(0, 0)
-  listOfTransformableObjects: TransformableObject[] = []
-
-  selectedObject: TransformableObject;
-  idCard: IdCard;
-  editField: EditField;
-
-  currentCreationMode: LayoutDesignerlCreationMode = LayoutDesignerlCreationMode.Edit;
-
-  zoomFactor = 0;
-  minZoomFactor = 0;
-  maxZoomFactor = 500;
-  zoomStep = 10;
-
-
-  constructor(private htmlDialog: MatDialog) {
-    console.log('d')
-  }
-
-  ngOnInit(): void {
-    this.idCard = new IdCard('idCard', this.editField);
-    this.idCard.setOuterObject(this.idCard);
-  }
-
-  ngAfterViewInit() {
-    this.initializeIdCard();
-  }
-
-  initializeIdCard(): void {
-    let outerStyle = document.getElementById('layout-desinger-space-around').getBoundingClientRect();
-    this.idCard.height = 540 / 2.2;
-    this.idCard.width = 856 / 2.2;
-    this.idCard.position.x = outerStyle.width / 2 - this.idCard.width / 2 + outerStyle.x;
-    this.idCard.position.y = outerStyle.height / 2 - this.idCard.height / 2 + outerStyle.y;
-
-    this.editField = new EditField();
-    this.editField.position.x = outerStyle.x;
-    this.editField.position.y = outerStyle.y;
-    this.editField.height = outerStyle.height;
-    this.editField.width = outerStyle.width
-
-    this.render()
-  }
-
-  dragObject(x: number, y: number) {
-    /*this.listOfTransformableObjects.forEach(ob => {
-      if (ob.checkIfObjectIsThere(x, y)) {
-        this.selectedObject = ob;
-      }
-    });*/
-    // if (this.selectedObject) { this.selectedObject.unselect(); }
-    let child = this.idCard.getChildByPosition(new Position(x, y));
-    if (child) {
-      this.selectedObject = child;
-      this.selectedObject.select();
-      return true;
+    // Delete
+    if (event.code === 'Delete' && this.selectedObject) {
+      this.selectedObject.delete();
+      this.listOfTransformableObjects = this.listOfTransformableObjects.filter(ob => !ob.deleteState);
+      this.selectedObject = this.currentDefaultObject;
+      this.render();
     }
-    return false;
+
+    // Arrow
+    if (!this.selectedObject?.noRender && this.selectedObject) {
+      if (event.code === 'ArrowRight') {
+        this.moveObject(new Position(1, 0));
+      }
+      if (event.code === 'ArrowLeft') {
+        this.moveObject(new Position(-1, 0));
+      }
+      if (event.code === 'ArrowUp') {
+        this.moveObject(new Position(0, -1));
+      }
+      if (event.code === 'ArrowDown') {
+        this.moveObject(new Position(0, 1));
+      }
+    }
+
+    // CTRL C
+    if (this.selectedObject && (event.ctrlKey || event.metaKey) && event.keyCode == 67) {
+      this.copyedObject = this.copySelectedObject();
+    }
+
+    // CTRL V
+    if ((event.ctrlKey || event.metaKey) && event.keyCode == 86) {
+      this.addObjectToView(this.copyedObject, true);
+    }
   }
 
   selectObjectByMouseClick(x: number, y: number): boolean {
-    /*if (this.selectedObject) {
-      if (this.selectedObject.checkIfObjectIsThere(x, y)) {
-        return true;
-      }
-    }
-    let found = false;
-
-    let selectedObject: TransformableObject = null;
-    this.listOfTransformableObjects.forEach(ob => {
-      if (ob.checkIfObjectIsThere(x, y)) {
-        selectedObject = ob;
-        found = true;
-      }
-    });
-
-    if (found) {
-      this.selectedObject = selectedObject;
-      this.unselectAllTransformableObjects();
-      this.selectedObject.select();
-    } else {
-      this.selectedObject = null;
-      this.unselectAllTransformableObjects();
-    }
-    this.render();
-    return found*/
-    // 
-    x = x + this.editField.scrollX;
-    y = y + this.editField.scrollY;
+    x = x + this.editField.scrollX - this.editField.position.x;
+    y = y + this.editField.scrollY - this.editField.position.y;
     let child = this.idCard.getChildByPosition(new Position(x, y));
     if (child) {
       if (this.selectedObject !== child && this.selectedObject) { this.selectedObject.unselect(); }
@@ -227,74 +236,99 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
     return false;
   }
 
-  unselectAllTransformableObjects(): void {
-    this.listOfTransformableObjects.forEach(ob => {
-      if (ob !== this.selectedObject) {
-        ob.unselect();
-      }
-    })
-  }
-
-  deleteUnusedObjects(): void {
-    if (this.selectedObject.deleteState) {
-      this.selectedObject = null;
-    }
-    this.listOfTransformableObjects = this.listOfTransformableObjects.filter(ob => !ob.deleteState);
-  }
-
   moveObject(position: Position) {
     this.selectedObject.transform(position);
     this.render();
   }
 
+  private addObjectToView(object: TransformableObject, select: boolean = false): void {
+    object.id = this.getNewObjectId();
+    select ? object.select() : object.unselect();
+    object.editEnd();
+
+    object.getAllChildren().forEach(c => { this.addObjectToView(c); })
+    this.idCard.addChild(object, true);
+
+    object.getObservable().subscribe(() => { this.render(); });
+    this.listOfTransformableObjects.push(object);
+
+    select && this.selectedObject ? this.selectedObject.unselect() : '';
+    this.selectedObject = select ? object : this.selectedObject;
+
+    this.render();
+  }
+
+  private copySelectedObject(): TransformableObject {
+    let copy: TransformableObject;
+    switch (this.selectedObject.type) {
+      case 'Rect':
+        copy = this.selectedObject.getCopy() as Rect;
+        break;
+      case 'SelectionWrapper':
+        copy = this.selectedObject.getCopy() as SelectionWrapper;
+        break;
+      case 'EditableImage':
+        copy = this.selectedObject.getCopy() as EditableImage;
+        break;
+      case 'TextField':
+        copy = this.selectedObject.getCopy() as TextField;
+        break;
+      case 'Circle':
+        copy = this.selectedObject.getCopy() as Circle;
+        break;
+      default:
+        break;
+    }
+    return copy;
+  }
+
   createObject(position: Position, imageSrc?: string): void {
-    let id = '0'
-    this.listOfTransformableObjects.forEach(ob => {
-      if (parseInt(ob.id) > parseInt(id)) {
-        id = (parseInt(ob.id) + 1) + ''
-      }
-    });
+    position = new Position(position.x + this.editField.scrollX - this.editField.position.x, position.y + this.editField.scrollY - this.editField.position.y);
+
+    let id = this.getNewObjectId();
+
     if (this.selectedObject) { this.selectedObject.unselect(); }
     if (LayoutDesignerlCreationMode.None == this.currentCreationMode) {
-      this.selectedObject = new SelectionWrapper(id, this.editField, this.listOfTransformableObjects);
+      this.selectedObject = new SelectionWrapper(id, this.editField, this.listOfTransformableObjects.filter(o => o.deleteState === false));
       this.selectedObject.setOuterObject(this.idCard);
       this.selectedObject.select();
       this.selectedObject.position = new Position(position.x, position.y);
       this.idCard.addChild(this.selectedObject);
-      /*this.listOfTransformableObjects.forEach(ob => {
-        ob.unselect()
-      });*/
-    } else if (LayoutDesignerlCreationMode.Rect == this.currentCreationMode) {
-      // this.selectedObject.unselect();
+    }
+    else if (LayoutDesignerlCreationMode.Rect == this.currentCreationMode) {
       this.selectedObject = new Rect(id, this.editField);
+      this.selectedObject.addCurrentObjectValues(this.defaultRect);
       this.selectedObject.setOuterObject(this.idCard);
       this.selectedObject.select();
       this.selectedObject.position = new Position(position.x, position.y);
       this.idCard.addChild(this.selectedObject);
-      /*this.listOfTransformableObjects.forEach(ob => {
-        ob.unselect()
-      });*/
-    } else if (LayoutDesignerlCreationMode.Image == this.currentCreationMode) {
+    }
+    else if (LayoutDesignerlCreationMode.Image == this.currentCreationMode) {
       this.selectedObject = new EditableImage(id, this.editField, imageSrc, this.idCard);
+      this.selectedObject.addCurrentObjectValues(this.defaultEditableImage);
       this.selectedObject.setOuterObject(this.idCard);
       this.selectedObject.select();
       this.selectedObject.position = new Position(position.x, position.y);
-      this.currentCreationMode = LayoutDesignerlCreationMode.None;
+      this.changeCreationMode(LayoutDesignerlCreationMode.None);
       this.idCard.addChild(this.selectedObject);
-      /*this.listOfTransformableObjects.forEach(ob => {
-        ob.unselect()
-      });*/
-    } else if (LayoutDesignerlCreationMode.Circle == this.currentCreationMode) {
+    }
+    else if (LayoutDesignerlCreationMode.Circle == this.currentCreationMode) {
       this.selectedObject = new Circle(id, this.editField);
+      this.selectedObject.addCurrentObjectValues(this.defaultCircle);
       this.selectedObject.setOuterObject(this.idCard);
       this.selectedObject.select();
       this.selectedObject.position = new Position(position.x, position.y);
-      this.currentCreationMode = LayoutDesignerlCreationMode.None;
+      this.changeCreationMode(LayoutDesignerlCreationMode.None);
       this.idCard.addChild(this.selectedObject);
-      /*this.listOfTransformableObjects.forEach(ob => {
-        ob.unselect()
-      });*/
-
+    }
+    else if (LayoutDesignerlCreationMode.Text == this.currentCreationMode) {
+      this.selectedObject = new TextField(id, this.editField);
+      this.selectedObject.addCurrentObjectValues(this.defaultTextField);
+      this.selectedObject.setOuterObject(this.idCard);
+      this.selectedObject.select();
+      this.selectedObject.position = new Position(position.x, position.y);
+      this.changeCreationMode(LayoutDesignerlCreationMode.None);
+      this.idCard.addChild(this.selectedObject);
     }
 
     this.selectedObject.getObservable().subscribe(() => {
@@ -307,33 +341,59 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
   }
 
   render(): void {
+    if (this.selectedObject) {
+      if (this.selectedObject.noRender) {
+        return;
+      }
+    }
     this.listOfTransformableObjects = this.listOfTransformableObjects.filter(ob => !ob.deleteState);
-    this.cardBinary.nativeElement.innerHTML = '';
-    this.setHtml(this.idCard);
-    /*this.listOfTransformableObjects.forEach(ob => {
-      this.setHtml(ob);
-    });*/
-  }
-
-  setHtml(ob: RenderableObject): void {
+    // this.cardBinary.nativeElement.innerHTML = '';
+    console.log(this.cardBinary.nativeElement)
+    if (this.cardBinary.nativeElement.childen) {
+      document.getElementById('idCard').removeChild(document.getElementById(this.selectedObject.id));
+    }
     this.cardBinary.nativeElement
-      .insertAdjacentHTML('beforeend', ob.getHTML());
+      .insertAdjacentHTML('beforeend', this.idCard.getHTML());
+    this.idCard.addFunctions(document);
   }
 
   // Template-Functions
   changeCreationMode(mode: number): void {
     if (mode === LayoutDesignerlCreationMode.Image) {
+      this.currentDefaultObject = this.defaultEditableImage;
       document.getElementById('imageUploader').click();
     }
+    if (mode === LayoutDesignerlCreationMode.Text) {
+      this.currentDefaultObject = this.defaultTextField;
+    }
+    if (mode === LayoutDesignerlCreationMode.Rect) {
+      this.currentDefaultObject = this.defaultRect;
+    }
+    if (mode === LayoutDesignerlCreationMode.Circle) {
+      this.currentDefaultObject = this.defaultCircle;
+    }
+    if (mode === LayoutDesignerlCreationMode.None) {
+      this.currentDefaultObject = null;
+    }
+    this.selectedObject =
+      (this.selectedObject !== this.defaultTextField
+        && this.selectedObject !== this.defaultRect
+        && this.selectedObject !== this.defaultEditableImage
+        && this.selectedObject !== this.defaultCircle
+        && this.selectedObject)
+        ? this.selectedObject
+        : this.currentDefaultObject;
+
     this.currentCreationMode = mode;
   }
 
+
+
   menuRightChanged(): void {
     this.selectedObject.transform(new Position(0, 0));
+    this.selectedObject.noRender = false;
     this.render();
   }
-
-  private imageSrc: string = '';
 
   handleInputChange(e: any) {
     var file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
@@ -349,7 +409,6 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
   private handleReaderLoaded(e: any): void {
     let reader = e.target;
-    this.imageSrc = reader.result;
     this.createObject(new Position(this.idCard.position.x, this.idCard.position.y), reader.result)
   }
 
@@ -395,7 +454,16 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
   onScrollEditField(event: any): void {
     this.editField.scrollY = event.srcElement.scrollTop;
     this.editField.scrollX = event.srcElement.scrollLeft;
-    console.log(event.srcElement.scrollTop);
+  }
+
+  private getNewObjectId(): string {
+    let id = '0'
+    this.listOfTransformableObjects.forEach(ob => {
+      if (parseInt(ob.id) > parseInt(id)) {
+        id = (parseInt(ob.id) + 1) + ''
+      }
+    });
+    return id;
   }
 }
 

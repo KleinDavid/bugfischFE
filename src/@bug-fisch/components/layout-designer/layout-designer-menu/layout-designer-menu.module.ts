@@ -15,7 +15,10 @@ import { LayoutDesignerMenuLeftComponent } from './menu-left/menu-left.component
 import { LayoutDesignerMenuRightComponent } from './menu-right/menu-right.component';
 import { LayoutDesignerMenuTopComponent } from './menu-top/menu-top.component';
 import { ColorPickerModule } from 'ngx-color-picker';
-import {MatRadioModule} from '@angular/material/radio'
+import { MatRadioModule } from '@angular/material/radio'
+import { MatSelectModule } from '@angular/material/select';
+import { MatOptionModule, MatNativeDateModule } from '@angular/material/core';
+import { FormsModule } from '@angular/forms';
 
 @NgModule({
     imports: [
@@ -28,6 +31,12 @@ import {MatRadioModule} from '@angular/material/radio'
         MatIconModule,
         YouTubePlayerModule,
         MatRadioModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatOptionModule,
+        MatNativeDateModule,
+        FormsModule,
+        MatSelectModule,
 
         MatFormFieldModule,
         BugFischSharedModule,

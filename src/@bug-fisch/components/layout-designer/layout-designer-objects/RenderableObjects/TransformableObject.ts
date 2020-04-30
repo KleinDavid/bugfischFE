@@ -3,25 +3,32 @@ import { LayoutDesignerlEditMode } from '../Enums';
 import { TransformRect } from './TransformRect';
 import { EditField } from './EditField';
 import { Position } from '../Position';
-import { ZoomableObject } from '../ZoomableObject';
+import { Subject } from 'rxjs';
+import { Transformation } from '../Transformation';
 
-export class TransformableObject extends RenderableObject{
+export abstract class TransformableObject extends RenderableObject {
 
   selected: boolean = false;
   deleteState: boolean = false;
+  protected positionAndSizeChanceSubject: Subject<Transformation> = new Subject<Transformation>()
 
   id: string;
   editMode: LayoutDesignerlEditMode = LayoutDesignerlEditMode.None;
-  editableProperties: string[] = ['position.x', 'position.y', 'width', 'height', 'borderColor', 'borderWidth', 'borderType', 'borderRadius', 'backgroundColor'];
+  editableProperties: string[] = ['position.x', 'position.y', 'width', 'height', 'borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'backgroundColor'];
   editField: EditField;
-  typeName: string = '';
+  
+  abstract type: string;
+  abstract typeName: string;
+  abstract icon: string;
+
+  noRender = false;
 
   relativeWidthToParent: number;
   relativeHeightToParent: number;
   relativePositionToParent: Position;
 
   exampleTransformRect: TransformRect = new TransformRect();
-  transformRects: TransformRect[] = []
+  transformRects: TransformRect[] = [];
 
   constructor(id: string, editField: EditField) {
     super()
@@ -35,7 +42,6 @@ export class TransformableObject extends RenderableObject{
     if (this.selected) {
       for (let i = 0; i < 8; i++) {
         if (this.transformRects[i].checkIfObjectIsThere(x, y)) {
-
           this.editMode = i + 2;
           return true;
         }
@@ -49,6 +55,9 @@ export class TransformableObject extends RenderableObject{
   }
 
   editEnd(): void {
+    if(this.width === 0 && this.height === 0){
+      this.delete();
+    }
     this.editMode = LayoutDesignerlEditMode.Move;
   }
 
@@ -61,11 +70,12 @@ export class TransformableObject extends RenderableObject{
     div.style.width = this.width + 'px';
     div.style.top = this.position.y + 'px';
     div.style.left = this.position.x + 'px';
+    div.style.zIndex = this.zIndex + '';
 
     div.style.borderRadius = this.borderRadius + 'px';
     div.style.cursor = this.cursor;
     div.style.backgroundColor = this.backgroundColor;
-    div.style.border = this.borderWidth + 'px ' + this.borderType + ' ' + this.borderColor;
+    div.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
     div.id = this.id;
 
     if (this.selected) {
@@ -113,10 +123,6 @@ export class TransformableObject extends RenderableObject{
       this.changeResizeDirection();
     }
     this.createTransformRects();
-    let overflowPosition = this.getOverflowOfEditField();
-    /*if (overflowPosition.x !== 0 || overflowPosition.y !== 0 && recursion === 0) {
-      this.transform(overflowPosition, 1);
-    }*/
   }
 
   changeResizeDirection() {
@@ -237,6 +243,7 @@ export class TransformableObject extends RenderableObject{
       cornerRect.backgroundColor = this.exampleTransformRect.backgroundColor;
       cornerRect.height = this.cornerRectSize;
       cornerRect.width = this.cornerRectSize;
+      cornerRect.zIndex = 1000;
       switch (i) {
         case 1:
           cornerRect.position.y = (this.position.y - this.cornerRectSize / 2);
@@ -323,14 +330,32 @@ export class TransformableObject extends RenderableObject{
     // center = this.getCenter();
     let transXFactor = center.x / (this.width + this.borderWidth * 2);
     let transYFactor = center.y / (this.height + this.borderWidth * 2);
-    
+
     let widthBefore = this.width;
     this.width += factor;
-    this.position.x -= (factor * transXFactor -xTransParent);
-    
-    
+    this.position.x -= (factor * transXFactor - xTransParent);
+
+
     let factorY = factor / widthBefore * this.height;
     this.position.y -= factorY * transYFactor - yTransParent;
     this.height += factorY;
+  }
+
+  addFunctions(document: Document): void {
+
+  }
+
+  abstract getCopy(): TransformableObject;
+
+  getAllChildren(): TransformableObject[] {
+    return [];
+  }
+
+  addCurrentObjectValues(defaultObject: TransformableObject) {
+    defaultObject.editableProperties.forEach(p => { this[p] = defaultObject[p] });
+  }
+
+  getPositionAndSizeChanceSubject(): Subject<Transformation> {
+    return this.positionAndSizeChanceSubject;
   }
 }

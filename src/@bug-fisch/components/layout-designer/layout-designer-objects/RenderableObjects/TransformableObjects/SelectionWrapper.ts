@@ -3,11 +3,18 @@ import { LayoutDesignerlEditMode } from '../../Enums';
 import { EditField } from '../EditField';
 import { TransformRect } from '../TransformRect';
 import { Position } from '../../Position';
+import { Rect } from './Rect';
+import { EditableImage } from './EditableImage';
+import { TextField } from './TextField';
+import { Circle } from './Circle';
 
 export class SelectionWrapper extends TransformableObject {
+  icon: string;
+  type = 'SelectionWrapper'
+
   borderWidth = 1;
-  selectetObjects: TransformableObject[] = [];
-  borderType = 'dashed';
+  borderStyle = 'dashed';
+  typeName = 'Auswahl';
   allTransformableObjects: TransformableObject[] = [];
   selectedObjects: TransformableObject[] = [];
   editableProperties = [];
@@ -20,6 +27,25 @@ export class SelectionWrapper extends TransformableObject {
     super(id, editField);
     this.exampleTransformRect.backgroundColor = 'none';
     this.allTransformableObjects = allTransformableObjects;
+    this.editableProperties = ['position.x', 'position.y', 'width', 'height'];
+    this.positionAndSizeChanceSubject.subscribe(value => {
+      if (value.propertyName === 'width') {
+        this.editMode = LayoutDesignerlEditMode.Resize4;
+        this.transformChildren(new Position(value.valueAfter - value.valueBefore, 0));
+      }
+      if (value.propertyName === 'height') {
+        this.editMode = LayoutDesignerlEditMode.Resize6;
+        this.transformChildren(new Position(0, value.valueAfter - value.valueBefore));
+      }
+      if (value.propertyName === 'position.x') {
+        this.editMode = LayoutDesignerlEditMode.Move;
+        this.transformChildren(new Position(value.valueAfter - value.valueBefore, 0));
+      }
+      if (value.propertyName === 'position.y') {
+        this.editMode = LayoutDesignerlEditMode.Resize4;
+        this.transformChildren(new Position(0, value.valueAfter - value.valueBefore));
+      }
+    })
   }
 
   delete(): void {
@@ -29,7 +55,7 @@ export class SelectionWrapper extends TransformableObject {
     super.delete();
   }
 
-  select(): void{
+  select(): void {
     this.deleteState = false;
     super.select();
   }
@@ -92,11 +118,11 @@ export class SelectionWrapper extends TransformableObject {
       super.editEnd();
       return;
     }
-    console.log(this)
 
     this.position = topLeft;
     this.width = bottomRight.x - topLeft.x;
     this.height = bottomRight.y - topLeft.y;
+    this.borderWidth = this.selectedObjects.length === 1 ? 0 : 1;
 
     if (this.isSelecting) {
       for (let o of this.selectedObjects) {
@@ -126,6 +152,10 @@ export class SelectionWrapper extends TransformableObject {
 
   transform(position: Position) {
     super.transform(position);
+    this.transformChildren(position);
+  }
+
+  private transformChildren(position: Position) {
     this.selectedObjects.forEach(o => {
       //o.editMode = this.editMode;
       if (this.editMode === LayoutDesignerlEditMode.Move) {
@@ -236,5 +266,48 @@ export class SelectionWrapper extends TransformableObject {
       return true;
     }
     return false;
+  }
+
+  getCopy(): SelectionWrapper {
+    let copyedObject: SelectionWrapper = new SelectionWrapper('', this.editField, this.allTransformableObjects);
+    for (let key in this) {
+      if (key !== 'changedSubject' && key !== 'positionAndSizeChanceSubject' && key !== 'allTransformableObjects' && key !== 'selectedObjects') {
+        copyedObject[key + ''] = JSON.parse(JSON.stringify(this[key]));
+      }
+
+      if (key === 'selectedObjects') {
+        let childList = [];
+        for (let c of this[key + '']) {
+          let copy: TransformableObject;
+          switch (c.type) {
+            case 'Rect':
+              copy = c.getCopy() as Rect;
+              break;
+            case 'SelectionWrapper':
+              copy = c.getCopy() as SelectionWrapper;
+              break;
+            case 'EditableImage':
+              copy = c.getCopy() as EditableImage;
+              break;
+            case 'TextField':
+              copy = c.getCopy() as TextField;
+              break;
+            case 'Circle':
+              copy = c.getCopy() as Circle;
+              break;
+            default:
+              break;
+          }
+
+          childList.push(copy);
+        }
+        copyedObject['selectedObjects'] = childList;
+      }
+    }
+    return copyedObject;
+  }
+
+  getAllChildren(): TransformableObject[] {
+    return this.selectedObjects;
   }
 }

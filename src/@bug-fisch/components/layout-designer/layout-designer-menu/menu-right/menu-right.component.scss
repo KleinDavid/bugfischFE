@@ -6,7 +6,7 @@
   flex-direction: column;
 
   .menu-properties {
-    overflow-y: scroll;
+    overflow-y: auto;
     flex: 1 1 auto;
   }
 
@@ -58,4 +58,16 @@
       font-size: 36px;
     }
   }
+}
+
+::ng-deep .inputAndSelect .mat-form-field-infix {
+  display: inherit;
+}
+
+::ng-deep .inputAndSelect .mat-select-value {
+  display: none;
+}
+
+::ng-deep .inputAndSelect .mat-select-trigger{
+  float: right;
 }
