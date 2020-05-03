@@ -10,32 +10,37 @@ export abstract class TransformableObject extends RenderableObject {
 
   selected: boolean = false;
   deleteState: boolean = false;
-  protected positionAndSizeChanceSubject: Subject<Transformation> = new Subject<Transformation>()
+  protected positionAndSizeChanceSubject: Subject<Transformation> = new Subject<Transformation>();
 
   id: string;
   editMode: LayoutDesignerlEditMode = LayoutDesignerlEditMode.None;
   editableProperties: string[] = ['position.x', 'position.y', 'width', 'height', 'borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'backgroundColor'];
-  editField: EditField;
-  
+
   abstract type: string;
   abstract typeName: string;
   abstract icon: string;
 
-  noRender = false;
+  // noRender = false;
 
   relativeWidthToParent: number;
   relativeHeightToParent: number;
   relativePositionToParent: Position;
 
-  exampleTransformRect: TransformRect = new TransformRect();
   transformRects: TransformRect[] = [];
+  cornerRectSize = 11;
 
-  constructor(id: string, editField: EditField) {
+  constructor(id: string) {
     super()
     this.id = id;
-    this.editField = editField;
-    this.createTransformRects();
     this.cursor = 'pointer';
+  }
+
+  create(): void {
+
+  }
+
+  render(): void {
+
   }
 
   checkIfObjectIsThere(x: number, y: number): boolean {
@@ -55,7 +60,7 @@ export abstract class TransformableObject extends RenderableObject {
   }
 
   editEnd(): void {
-    if(this.width === 0 && this.height === 0){
+    if (this.width === 0 && this.height === 0) {
       this.delete();
     }
     this.editMode = LayoutDesignerlEditMode.Move;
@@ -93,17 +98,22 @@ export abstract class TransformableObject extends RenderableObject {
 
   select(): void {
     this.cursor = 'move';
+    this.createTransformRects();
     this.selected = true;
   }
 
   unselect(): void {
     this.cursor = 'pointer';
     this.editMode = LayoutDesignerlEditMode.None;
+    this.transformRects.forEach(r => r.delete());
+    this.transformRects = [];
     this.selected = false;
   }
 
   delete(): void {
     this.deleteState = true;
+    this.transformRects.forEach(t => t.delete());
+    super.delete();
   }
 
   public moveByDifference(position: Position) {
@@ -115,17 +125,21 @@ export abstract class TransformableObject extends RenderableObject {
     this.createTransformRects();
   }
 
-  transform(position: Position, recursion = 0): void {
+  setParent(ob: TransformableObject): void {
+    this.parent = ob;
+  }
+
+  transform(position: Position): void {
     if (this.editMode === LayoutDesignerlEditMode.Move) {
       this.moveByDifference(position);
     } else {
       this.resize(position);
       this.changeResizeDirection();
     }
-    this.createTransformRects();
+    this.selected ? this.createTransformRects() : '';
   }
 
-  changeResizeDirection() {
+  protected changeResizeDirection() {
     if (this.width < 0 && this.height < 0) {
       this.editMode = (((this.editMode - 1) + 4) % 8) + 1;
       this.position.x += this.width;
@@ -163,7 +177,7 @@ export abstract class TransformableObject extends RenderableObject {
     }
   }
 
-  resize(position: Position): void {
+  private resize(position: Position): void {
     switch (this.editMode) {
       case LayoutDesignerlEditMode.Resize1:
         this.resize1(position);
@@ -237,13 +251,19 @@ export abstract class TransformableObject extends RenderableObject {
   }
 
   protected createTransformRects() {
-    this.transformRects = []
+    if (this.transformRects.length === 0) {
+      for (let i = 1; i <= 8; i++) {
+        let cornerRect = new TransformRect();;
+        cornerRect.setParent(this.parent);
+        cornerRect.id = 'TransformRect-' + i;
+        cornerRect.create();
+        this.transformRects.push(cornerRect);
+      }
+    }
     for (let i = 1; i <= 8; i++) {
-      let cornerRect = new TransformRect();
-      cornerRect.backgroundColor = this.exampleTransformRect.backgroundColor;
+      let cornerRect = this.transformRects[i - 1];
       cornerRect.height = this.cornerRectSize;
       cornerRect.width = this.cornerRectSize;
-      cornerRect.zIndex = 1000;
       switch (i) {
         case 1:
           cornerRect.position.y = (this.position.y - this.cornerRectSize / 2);
@@ -288,41 +308,8 @@ export abstract class TransformableObject extends RenderableObject {
         default:
           break;
       }
-      this.transformRects.push(cornerRect);
+      cornerRect.render();
     }
-  }
-
-  transformByCorners(leftTop: Position, rightTop: Position, leftBottom: Position): void {
-    this.position = leftTop;
-    this.width = rightTop.x - leftTop.x;
-    this.height = leftTop.y - leftBottom.y;
-  }
-
-  getOverflowOfEditField(): Position {
-    /*  let positionChange = new Position(0, 0)
-      for (let i = 1; i <= 8; i++) {
-        let rect = this.transformRects[i - 1]
-        if (i === 2) {
-          if (rect.position.y < this.editField.position.y) {
-            positionChange.y = this.editField.position.y - rect.position.y;
-          }
-        } else if (i === 4) {
-          if (rect.position.x + rect.width > this.editField.position.x + this.editField.width) {
-            positionChange.x = (this.editField.position.x + this.editField.width) - (rect.position.x + rect.width);
-          }
-        } else if (i === 6) {
-          if (rect.position.y + rect.height > this.editField.position.y + this.editField.height) {
-            positionChange.y = (this.editField.position.y + this.editField.height) - (rect.position.y + rect.height);
-  
-          }
-        } else if (i === 8) {
-          if (rect.position.x < this.editField.position.x) {
-            positionChange.x = this.editField.position.x - rect.position.x;
-          }
-        }
-      }
-      return positionChange;*/
-    return new Position(0, 0);
   }
 
   zoom(factor: number, center: Position, xTransParent, yTransParent): void {
@@ -341,12 +328,9 @@ export abstract class TransformableObject extends RenderableObject {
     this.height += factorY;
   }
 
-  addFunctions(document: Document): void {
-
-  }
-
   abstract getCopy(): TransformableObject;
 
+  // ?
   getAllChildren(): TransformableObject[] {
     return [];
   }

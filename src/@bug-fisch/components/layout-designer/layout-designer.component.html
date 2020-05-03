@@ -10,13 +10,14 @@
                 (onCreationModeChanged)="changeCreationMode($event)">
             </atled-layout-designer-menu-left>
         </div>
-        <div fxFlex id="layout-desinger-space-around" class="layout-desinger" (scroll)="onScrollEditField($event)">
+        <div fxFlex draggable="false" id="layout-desinger-space-around" class="layout-desinger" (scroll)="onScrollEditField($event)" ondragstart="return false;" ondrop="return false;">
             <div class="zoom-elements">
                 <div class="zoom-element zoom-element-top" style="border-bottom: 1px solid black;" (click)="zoomIn()">+</div>
                 <div class="zoom-element zoom-element-bootom" (click)="zoomOut()">-</div>
             </div>
             <!--<div id="atled-layout-designer-chipcard"></div>-->
-            <div class="cardBoundary" #cardBoundary>
+            <div id="cardBoundary" class="cardBoundary" #cardBoundary>
+            <!--<div class="noDragElement"></div>-->
             </div>
         </div>
         <div fxFlex="360px">

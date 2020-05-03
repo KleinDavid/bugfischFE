@@ -83,17 +83,16 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
   currentDefaultObject: TransformableObject;
 
   constructor(private htmlDialog: MatDialog) {
-    console.log('d');
   }
 
   ngOnInit(): void {
-    this.idCard = new IdCard('idCard', this.editField);
-    this.idCard.setOuterObject(this.idCard);
+    this.editField = new EditField();
+    this.idCard = new IdCard('idCard');
 
-    this.defaultRect = new Rect('', this.editField);
-    this.defaultCircle = new Circle('', this.editField);
-    this.defaultTextField = new TextField('', this.editField);
-    this.defaultEditableImage = new EditableImage('', this.editField, '', this.idCard);
+    this.defaultRect = new Rect('');
+    this.defaultCircle = new Circle('');
+    this.defaultTextField = new TextField('');
+    this.defaultEditableImage = new EditableImage('', '', this.idCard);
 
     this.defaultRect.editableProperties = ['borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'backgroundColor'];
     this.defaultCircle.editableProperties = ['borderWidth', 'borderColor', 'backgroundColor']
@@ -107,17 +106,18 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
   // init Functions
   initializeIdCard(): void {
+
     let outerStyle = document.getElementById('layout-desinger-space-around').getBoundingClientRect();
     this.idCard.height = 540 / 2.2;
     this.idCard.width = 856 / 2.2;
     this.idCard.position.x = outerStyle.width / 2 - this.idCard.width / 2 + outerStyle.x;
     this.idCard.position.y = outerStyle.height / 2 - this.idCard.height / 2 + outerStyle.y;
 
-    this.editField = new EditField();
     this.editField.position.x = outerStyle.x;
     this.editField.position.y = outerStyle.y;
     this.editField.height = outerStyle.height;
-    this.editField.width = outerStyle.width
+    this.editField.width = outerStyle.width;
+    this.idCard.create();
 
     this.render()
   }
@@ -165,7 +165,7 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
     if (event.clientX !== this.mouseDownPosition.x || event.clientY !== this.mouseDownPosition.y) {
       this.changeCreationMode(LayoutDesignerlCreationMode.None);
       this.droped = true;
-      this.selectedObject.editEnd();
+      this.selectedObject?.editEnd();
       this.render();
     }
 
@@ -197,7 +197,9 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
     }
 
     // Arrow
-    if (!this.selectedObject?.noRender && this.selectedObject) {
+
+    // ? !this.selectedObject?.noRender
+    if (!this.selectedObject && this.selectedObject) {
       if (event.code === 'ArrowRight') {
         this.moveObject(new Position(1, 0));
       }
@@ -246,6 +248,7 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
     select ? object.select() : object.unselect();
     object.editEnd();
 
+    // ?
     object.getAllChildren().forEach(c => { this.addObjectToView(c); })
     this.idCard.addChild(object, true);
 
@@ -283,78 +286,64 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
   }
 
   createObject(position: Position, imageSrc?: string): void {
+    console.log('selsc', this.selectedObject)
     position = new Position(position.x + this.editField.scrollX - this.editField.position.x, position.y + this.editField.scrollY - this.editField.position.y);
 
     let id = this.getNewObjectId();
+    console.log(id);
 
     if (this.selectedObject) { this.selectedObject.unselect(); }
-    if (LayoutDesignerlCreationMode.None == this.currentCreationMode) {
-      this.selectedObject = new SelectionWrapper(id, this.editField, this.listOfTransformableObjects.filter(o => o.deleteState === false));
-      this.selectedObject.setOuterObject(this.idCard);
-      this.selectedObject.select();
-      this.selectedObject.position = new Position(position.x, position.y);
-      this.idCard.addChild(this.selectedObject);
+
+    switch (this.currentCreationMode) {
+      case LayoutDesignerlCreationMode.None:
+        this.selectedObject = new SelectionWrapper(id, this.listOfTransformableObjects.filter(o => o.deleteState === false));
+        break;
+      case LayoutDesignerlCreationMode.Rect:
+        this.selectedObject = new Rect(id);
+        break;
+      case LayoutDesignerlCreationMode.Image:
+        this.selectedObject = new EditableImage(id, imageSrc, this.idCard);
+        break;
+      case LayoutDesignerlCreationMode.Circle:
+        this.selectedObject = new Circle(id);
+        break;
+      case LayoutDesignerlCreationMode.Text:
+        this.selectedObject = new TextField(id);
+        break;
+      default:
+        break;
     }
-    else if (LayoutDesignerlCreationMode.Rect == this.currentCreationMode) {
-      this.selectedObject = new Rect(id, this.editField);
-      this.selectedObject.addCurrentObjectValues(this.defaultRect);
-      this.selectedObject.setOuterObject(this.idCard);
-      this.selectedObject.select();
-      this.selectedObject.position = new Position(position.x, position.y);
-      this.idCard.addChild(this.selectedObject);
-    }
-    else if (LayoutDesignerlCreationMode.Image == this.currentCreationMode) {
-      this.selectedObject = new EditableImage(id, this.editField, imageSrc, this.idCard);
-      this.selectedObject.addCurrentObjectValues(this.defaultEditableImage);
-      this.selectedObject.setOuterObject(this.idCard);
-      this.selectedObject.select();
-      this.selectedObject.position = new Position(position.x, position.y);
-      this.changeCreationMode(LayoutDesignerlCreationMode.None);
-      this.idCard.addChild(this.selectedObject);
-    }
-    else if (LayoutDesignerlCreationMode.Circle == this.currentCreationMode) {
-      this.selectedObject = new Circle(id, this.editField);
-      this.selectedObject.addCurrentObjectValues(this.defaultCircle);
-      this.selectedObject.setOuterObject(this.idCard);
-      this.selectedObject.select();
-      this.selectedObject.position = new Position(position.x, position.y);
-      this.changeCreationMode(LayoutDesignerlCreationMode.None);
-      this.idCard.addChild(this.selectedObject);
-    }
-    else if (LayoutDesignerlCreationMode.Text == this.currentCreationMode) {
-      this.selectedObject = new TextField(id, this.editField);
-      this.selectedObject.addCurrentObjectValues(this.defaultTextField);
-      this.selectedObject.setOuterObject(this.idCard);
-      this.selectedObject.select();
-      this.selectedObject.position = new Position(position.x, position.y);
-      this.changeCreationMode(LayoutDesignerlCreationMode.None);
-      this.idCard.addChild(this.selectedObject);
-    }
+    this.selectedObject.addCurrentObjectValues(this.defaultTextField);
+    this.selectedObject.setParent(this.idCard);
+    this.selectedObject.position = new Position(position.x, position.y);
+    this.selectedObject.create();
+    this.selectedObject.select();
+    this.idCard.addChild(this.selectedObject);
+    this.changeCreationMode(LayoutDesignerlCreationMode.None);
 
     this.selectedObject.getObservable().subscribe(() => {
       this.render();
     })
 
     this.listOfTransformableObjects.push(this.selectedObject);
-
     this.render();
   }
 
   render(): void {
-    if (this.selectedObject) {
+    /*if (this.selectedObject) {
       if (this.selectedObject.noRender) {
         return;
       }
     }
     this.listOfTransformableObjects = this.listOfTransformableObjects.filter(ob => !ob.deleteState);
     // this.cardBinary.nativeElement.innerHTML = '';
-    console.log(this.cardBinary.nativeElement)
+   
     if (this.cardBinary.nativeElement.childen) {
       document.getElementById('idCard').removeChild(document.getElementById(this.selectedObject.id));
     }
     this.cardBinary.nativeElement
       .insertAdjacentHTML('beforeend', this.idCard.getHTML());
-    this.idCard.addFunctions(document);
+    this.idCard.addFunctions(document);*/
   }
 
   // Template-Functions
@@ -391,7 +380,7 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
   menuRightChanged(): void {
     this.selectedObject.transform(new Position(0, 0));
-    this.selectedObject.noRender = false;
+    // this.selectedObject.noRender = false;
     this.render();
   }
 
@@ -459,7 +448,7 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
   private getNewObjectId(): string {
     let id = '0'
     this.listOfTransformableObjects.forEach(ob => {
-      if (parseInt(ob.id) > parseInt(id)) {
+      if (parseInt(ob.id) >= parseInt(id)) {
         id = (parseInt(ob.id) + 1) + ''
       }
     });

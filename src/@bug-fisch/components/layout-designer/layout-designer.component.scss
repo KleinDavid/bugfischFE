@@ -33,6 +33,13 @@
       transform: translate(-50%, -50%);
     }
 
+    .noDragElement {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 1001;
+    }
+
     .zoom-elements {
       float: right;
       margin-top: 12px;
@@ -137,7 +144,6 @@
   top: 43mm;
   height: 187.5mm;
   width: 142.5mm;
-  background-image: url(https://res.cloudinary.com/css-tricks/image/fetch/w_600,q_auto,f_auto/https://cdn4.buysellads.net/uu/7/53660/1572641638-MC_CSSTricks_logo_600x600.png);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center center;

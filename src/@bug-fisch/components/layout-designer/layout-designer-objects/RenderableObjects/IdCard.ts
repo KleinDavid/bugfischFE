@@ -13,12 +13,37 @@ export class IdCard extends TransformableObject implements ZoomableObject {
 
   editableProperties = ['backgroundColor'];
 
-  getHTML(): string {
-    this.childList = this.childList.filter(c => c.deleteState === false);
-    let div = document.createElement('div');
-    div.id = this.id;
-    div.style.position = 'absolute';
+  create(): void {
+    this.htmlElementRef = document.createElement('div');
+    this.htmlElementRef.id = this.id;
+   document.getElementById('cardBoundary').appendChild(this.htmlElementRef);
+    this.render();
+  }
 
+  render(): void {
+    this.htmlElementRef.style.position = 'absolute';
+    this.htmlElementRef.style.height = this.height + 'px';
+    this.htmlElementRef.style.width = this.width + 'px';
+    this.htmlElementRef.style.top = this.position.y + 'px';
+    this.htmlElementRef.style.left = this.position.x + 'px';
+    this.htmlElementRef.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
+    this.htmlElementRef.style.borderRadius = this.borderRadius + 'px';
+    this.htmlElementRef.style.cursor = this.cursor;
+    this.htmlElementRef.style.backgroundColor = this.backgroundColor;
+    this.htmlElementRef.style.zIndex = this.zIndex + '';
+    this.htmlElementRef.style.overflow = this.overflow;
+  }
+
+  getHTML(): string {
+    let div = document.getElementById(this.id);
+    if (!div) {
+      div = document.createElement('div');
+      div.id = this.id;
+      document.getElementById('cardBoundary').appendChild(div);
+    }
+    this.childList = this.childList.filter(c => c.deleteState === false);
+
+    div.style.position = 'absolute';
     div.style.height = this.height + 'px';
     div.style.width = this.width + 'px';
     div.style.top = this.position.y + 'px';
@@ -32,12 +57,11 @@ export class IdCard extends TransformableObject implements ZoomableObject {
     div.style.overflow = this.overflow;
     for (let child of this.childList) {
       if (child.selected) {
-
         div.innerHTML += child.getHTML();
       }
     }
     // this.setZoom(1.5,div);
-    return div.outerHTML;
+    return '';
   }
 
   setZoom(zoom, el) {
@@ -92,12 +116,6 @@ export class IdCard extends TransformableObject implements ZoomableObject {
     this.childList.forEach(c => {
       let childFactor = (factor / this.width) * c.width;
       c.zoom(childFactor, centerBefore, factor * transXFactor, factorY * transYFactor);
-    });
-  }
-
-  addFunctions(document: Document): void {
-    this.childList.forEach(c => {
-      c.addFunctions(document);
     });
   }
 

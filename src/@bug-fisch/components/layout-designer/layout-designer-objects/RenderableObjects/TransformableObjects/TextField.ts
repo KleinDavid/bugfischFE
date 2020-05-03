@@ -1,6 +1,7 @@
 import { TransformableObject } from "../TransformableObject";
 import { EditField } from '../EditField';
 import { Position } from '../../Position';
+import { Input } from '@angular/core';
 
 export class TextField extends TransformableObject {
     icon: string = 'title';
@@ -26,10 +27,82 @@ export class TextField extends TransformableObject {
     textAlignProperties = ['right', 'center', 'left', 'justify'];
     verticalAlignProperties = ['top', 'middle', 'bottom'];
 
+    private tableCellDivRef: HTMLElement;
+    private textareaElementRef: HTMLTextAreaElement;
 
-    constructor(id: string, editField: EditField) {
-        super(id, editField);
+    constructor(id: string) {
+        super(id);
         this.editableProperties = ['position.x', 'position.y', 'width', 'height', 'fontStyle', 'fontVariant', 'fontWeight', 'fontSize', 'fontFamily', 'textAlign', 'verticalAlign'];
+    }
+
+    create(): void {
+        this.htmlElementRef = document.createElement('div');
+        this.htmlElementRef.id = this.id;
+
+        this.tableCellDivRef = document.createElement('div');
+        this.textareaElementRef = document.createElement('textarea');
+        this.textareaElementRef.addEventListener('keyup', this.onInput.bind(this));
+
+        this.htmlElementRef.appendChild(this.tableCellDivRef);
+
+        document.getElementById(this.parent.id).appendChild(this.htmlElementRef);
+        this.render();
+    }
+
+    render(): void {
+        this.htmlElementRef.style.position = 'absolute';
+
+        this.htmlElementRef.style.height = (this.height) + 'px';
+        this.htmlElementRef.style.width = (this.width) + 'px';
+        this.htmlElementRef.style.top = this.position.y + 'px';
+        this.htmlElementRef.style.left = this.position.x + 'px';
+        this.htmlElementRef.style.zIndex = this.zIndex + '';
+        this.htmlElementRef.style.overflow = 'hidden';
+
+        this.htmlElementRef.style.fontStyle = this.fontStyle;
+        this.htmlElementRef.style.fontVariant = this.fontVariant;
+        this.htmlElementRef.style.fontWeight = this.fontWeight;
+        this.htmlElementRef.style.fontSize = this.fontSize + '';
+        this.htmlElementRef.style.fontFamily = this.fontFamily;
+        this.htmlElementRef.style.textAlign = this.textAlign;
+        this.htmlElementRef.style.display = 'table';
+
+        this.htmlElementRef.style.cursor = this.cursor;
+
+        this.textareaElementRef.style.width = this.width + 'px';
+
+        this.tableCellDivRef.style.display = 'table-cell';
+        this.tableCellDivRef.style.verticalAlign = this.verticalAlign;
+    }
+
+    select() {
+        if(this.selected){
+            return;
+        }
+        super.select();
+
+        this.textareaElementRef.id = this.id + '-input';
+        this.textareaElementRef.classList.add('textFieldInput');
+        this.textareaElementRef.rows = this.text.split(/<br\s*[\/]?>/gi).length + 1
+        this.textareaElementRef.innerHTML = this.text.replace(/<br\s*[\/]?>/gi, '\n');
+
+        this.textareaElementRef.style.fontStyle = this.fontStyle;
+        this.textareaElementRef.style.fontVariant = this.fontVariant;
+        this.textareaElementRef.style.fontWeight = this.fontWeight;
+        this.textareaElementRef.style.fontSize = this.fontSize + '';
+        this.textareaElementRef.style.fontFamily = this.fontFamily;
+        this.textareaElementRef.style.textAlign = this.textAlign;
+        this.textareaElementRef.focus();
+
+        this.tableCellDivRef.innerHTML = '';
+        this.tableCellDivRef.appendChild(this.textareaElementRef);
+    }
+
+    unselect() {
+        super.unselect();
+        if (this.tableCellDivRef) {
+            this.tableCellDivRef.innerHTML = this.text;
+        }
     }
 
     getHTML(): string {
@@ -53,7 +126,6 @@ export class TextField extends TransformableObject {
         div.style.display = 'table';
 
         div.style.cursor = this.cursor;
-        div.id = this.id;
 
         let div2 = document.createElement('div');
         div2.style.display = 'table-cell';
@@ -85,7 +157,7 @@ export class TextField extends TransformableObject {
             this.transformRects.forEach(rect => {
                 resString += rect.getHTML();
             })
-            this.noRender = true;
+            // this.noRender = true;
 
             return resString;
         }
@@ -93,13 +165,8 @@ export class TextField extends TransformableObject {
         return div.outerHTML;
     }
 
-    unselect() {
-        this.noRender = false;
-        super.unselect();
-    }
-
     transform(position: Position): void {
-        this.noRender = false;
+        this.render();
         super.transform(position);
     }
 
@@ -118,7 +185,7 @@ export class TextField extends TransformableObject {
     }
 
     getCopy(): TextField {
-        let copyedObject: TextField = new TextField('', this.editField);
+        let copyedObject: TextField = new TextField('');
         for (let key in this) {
             if (key !== 'changedSubject') {
                 copyedObject[key.toString()] = JSON.parse(JSON.stringify(this[key]));

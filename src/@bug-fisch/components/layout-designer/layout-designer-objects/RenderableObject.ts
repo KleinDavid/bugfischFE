@@ -4,6 +4,7 @@ import { Position } from './Position';
 import { TransformableObject } from './RenderableObjects/TransformableObject';
 
 export abstract class RenderableObject {
+
   width: number;
   height: number;
   borderRadius: number = 0;
@@ -14,15 +15,15 @@ export abstract class RenderableObject {
   backgroundColor = 'none';
   borderStyle: string = 'solid';
   zIndex: number = 0;
-  overflow: string = 'hidden'
-  document: Document;
+  overflow: string = 'hidden';
+  id: string = '';
 
-  cornerRectSize = 11;
-  transformRects: TransformRect[] = [];
+  protected parent: TransformableObject;
 
-  // protected outerObject: RenderableObject;
   protected changedSubject: Subject<boolean> = new Subject<boolean>();
   protected childList: TransformableObject[] = [];
+
+  protected htmlElementRef: HTMLElement;
 
   constructor() {
     this.position = new Position();
@@ -30,20 +31,30 @@ export abstract class RenderableObject {
     this.width = 0;
   }
 
-  getHTML(): string {
-    let div = document.createElement('div');
-    div.style.position = 'absolute';
-    div.style.height = this.height + 'px';
-    div.style.width = this.width + 'px';
-    div.style.top = this.position.y + 'px';
-    div.style.left = this.position.x + 'px';
-    div.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
-    div.style.borderRadius = this.borderRadius + 'px';
-    div.style.cursor = this.cursor;
-    div.style.backgroundColor = this.backgroundColor;
-    div.style.zIndex = this.zIndex + '';
-    div.style.overflow = this.overflow;
-    return div.outerHTML;
+  create(): void {
+    this.htmlElementRef = document.createElement('div');
+    this.htmlElementRef.id = this.id;
+    document.getElementById(this.parent.id).appendChild(this.htmlElementRef);
+    this.render();
+  }
+
+  render(): void {
+    this.htmlElementRef.style.position = 'absolute';
+    this.htmlElementRef.style.height = this.height + 'px';
+    this.htmlElementRef.style.width = this.width + 'px';
+    this.htmlElementRef.style.top = this.position.y + 'px';
+    this.htmlElementRef.style.left = this.position.x + 'px';
+    this.htmlElementRef.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
+    this.htmlElementRef.style.borderRadius = this.borderRadius + 'px';
+    this.htmlElementRef.style.cursor = this.cursor;
+    this.htmlElementRef.style.backgroundColor = this.backgroundColor;
+    this.htmlElementRef.style.zIndex = this.zIndex + '';
+    this.htmlElementRef.style.overflow = this.overflow;
+  }
+
+  delete(): void {
+    let elem = document.getElementById(this.id);
+    elem ? elem.parentNode.removeChild(elem) : '';
   }
 
   addChild(child: TransformableObject, absolute: boolean = false) {
@@ -61,7 +72,7 @@ export abstract class RenderableObject {
   getChildByPosition(position: Position): TransformableObject {
     position.x -= this.position.x;
     position.y -= this.position.y;
-
+    this.childList = this.childList.filter(c => c.deleteState === false);
     let foundChilds = this.childList.filter(c => c.checkIfObjectIsThere(position.x, position.y));
     if (foundChilds.length > 0) {
       return foundChilds[foundChilds.length - 1]
@@ -69,8 +80,9 @@ export abstract class RenderableObject {
     return null;
   }
 
-  setOuterObject(ob: RenderableObject): void {
-    // this.outerObject = ob
+
+  getHTML(): string {
+    return '';
   }
 
   checkIfObjectIsThere(x: number, y: number) {
@@ -84,6 +96,10 @@ export abstract class RenderableObject {
     }
     return this.checkIfObjectIsThere(ob.position.x, ob.position.y) &&
       this.checkIfObjectIsThere(ob.position.x + ob.width + ob.borderWidth * 2, ob.position.y + ob.height + ob.borderWidth * 2)
+  }
+
+  setParent(parent: TransformableObject): void {
+    this.parent = parent;
   }
 
   getTopLeft(): Position {

@@ -23,9 +23,8 @@ export class SelectionWrapper extends TransformableObject {
 
   isSelecting = true;
 
-  constructor(id: string, editField: EditField, allTransformableObjects: TransformableObject[]) {
-    super(id, editField);
-    this.exampleTransformRect.backgroundColor = 'none';
+  constructor(id: string, allTransformableObjects: TransformableObject[]) {
+    super(id);
     this.allTransformableObjects = allTransformableObjects;
     this.editableProperties = ['position.x', 'position.y', 'width', 'height'];
     this.positionAndSizeChanceSubject.subscribe(value => {
@@ -48,6 +47,35 @@ export class SelectionWrapper extends TransformableObject {
     })
   }
 
+  create(): void {
+    this.htmlElementRef = document.createElement('div');
+    this.htmlElementRef.id = this.id;
+    document.getElementById(this.parent.id).appendChild(this.htmlElementRef);
+    this.render();
+  }
+
+  render(): void {
+    this.width -= (1 + this.borderIndexX);
+    this.height -= (1 + this.borderIndexY);
+    
+    this.htmlElementRef.style.position = 'absolute';
+
+    this.htmlElementRef.style.height = this.height + 'px';
+    this.htmlElementRef.style.width = this.width + 'px';
+    this.htmlElementRef.style.top = this.position.y + 'px';
+    this.htmlElementRef.style.left = this.position.x + 'px';
+    this.htmlElementRef.style.zIndex = this.zIndex + '';
+
+    this.htmlElementRef.style.borderRadius = this.borderRadius + 'px';
+    this.htmlElementRef.style.cursor = this.cursor;
+    this.htmlElementRef.style.backgroundColor = this.backgroundColor;
+    this.htmlElementRef.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
+    this.htmlElementRef.id = this.id;
+    
+    this.width += (1 + this.borderIndexX);
+    this.height += (1 + this.borderIndexY);
+  }
+
   delete(): void {
     this.selectedObjects.forEach(o => {
       o.delete();
@@ -61,7 +89,7 @@ export class SelectionWrapper extends TransformableObject {
   }
 
   unselect(): void {
-    this.deleteState = true;
+    super.delete();
     super.unselect();
   }
 
@@ -74,8 +102,7 @@ export class SelectionWrapper extends TransformableObject {
   }
 
   editEnd(): void {
-    let exRect = new TransformRect()
-    this.exampleTransformRect.backgroundColor = exRect.backgroundColor;
+    let exRect = new TransformRect();
 
     let topLeft: Position;
     let bottomRight: Position;
@@ -136,6 +163,7 @@ export class SelectionWrapper extends TransformableObject {
 
     this.isSelecting = false;
     this.select();
+    this.render();
     super.editEnd();
 
     this.createTransformRects();
@@ -153,6 +181,7 @@ export class SelectionWrapper extends TransformableObject {
   transform(position: Position) {
     super.transform(position);
     this.transformChildren(position);
+    this.render();
   }
 
   private transformChildren(position: Position) {
@@ -202,7 +231,8 @@ export class SelectionWrapper extends TransformableObject {
         o.height += (height - o.borderWidth * 2);
         o.position.x += x;
         o.position.y += y;
-        o.editEnd()
+        o.editEnd();
+        o.render();
       }
     });
   }
@@ -269,7 +299,7 @@ export class SelectionWrapper extends TransformableObject {
   }
 
   getCopy(): SelectionWrapper {
-    let copyedObject: SelectionWrapper = new SelectionWrapper('', this.editField, this.allTransformableObjects);
+    let copyedObject: SelectionWrapper = new SelectionWrapper('', this.allTransformableObjects);
     for (let key in this) {
       if (key !== 'changedSubject' && key !== 'positionAndSizeChanceSubject' && key !== 'allTransformableObjects' && key !== 'selectedObjects') {
         copyedObject[key + ''] = JSON.parse(JSON.stringify(this[key]));
