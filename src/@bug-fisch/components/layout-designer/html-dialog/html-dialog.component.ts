@@ -1,6 +1,12 @@
 import { Component, Inject, OnInit, ViewEncapsulation, AfterViewChecked, ViewChild, OnDestroy } from '@angular/core';
-import {MatDialog, MatDialogRef, MAT_DIALOG_DATA} from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import * as xmlFormatter from 'xml-formatter';
+import * as cleaner from 'clean-html';
+
+import * as pretty from 'pretty';
+import { IdCard } from '../layout-designer-objects/RenderableObjects/IdCard';
+import { TransformableObject } from '../layout-designer-objects/RenderableObjects/TransformableObject';
+import { CssClass } from '../layout-designer-objects/CssClass';
 
 @Component({
     selector: 'workflow-html-dialog.component',
@@ -35,10 +41,31 @@ export class HTMLDialog implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.xmlContent = JSON.parse(JSON.stringify(this.data.content));
+
+        //this.xmlContent = JSON.parse(JSON.stringify(this.data.content));
         // this.workState = this.data.state;
-        this.xmlContent = 
-        '<html lang="de"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Print-Layout | FDG-DUS | FDG-Dienst</title><style>.simple-image-box {overflow: hidden;width: 100%;height: 100%;  position: relative;}.simple-image {position: absolute;max-width: 100%;max-height: 100%;top: 0;bottom: 0;left: 0;right: 0;margin: auto;-webkit-user-select: none;-khtml-user-select: none;-moz-user-select: none;-o-user-select: none;user-select: none;}:host {display: block;left: 0;width: 100%;height: 100%;}</style></head><body>' + this.xmlContent + '</body></html>'
+        //this.xmlContent = 
+        let idCard = (this.data.idCard as IdCard);
+        let transformableObjects = (this.data.transformableObjects as TransformableObject[]);
+        let cssClasses = (this.data.cssClasses as CssClass[])
+        transformableObjects.forEach(t => t.unselect());
+        let style = document.createElement('style');
+        transformableObjects.forEach(t => { style.innerHTML += t.getCss() });
+        cssClasses.forEach(t => { style.innerHTML += t.getCss() })
+        console.log(style.outerHTML);
+
+        let u = '<html lang="de"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Print-Layout | FDG-DUS | FDG-Dienst</title>' + style.outerHTML + '<style>.simple-image-box {overflow: hidden;width: 100%;height: 100%;  position: relative;}.simple-image {position: absolute;max-width: 100%;max-height: 100%;top: 0;bottom: 0;left: 0;right: 0;margin: auto;-webkit-user-select: none;-khtml-user-select: none;-moz-user-select: none;-o-user-select: none;user-select: none;}:host {display: block;left: 0;width: 100%;height: 100%;}</style></head><body>' + idCard.getFinalHTML() + '</body></html>'
+        let html = document.createElement('html')
+        html.innerHTML = u;
+        let str = html.outerHTML;
+        console.log(str);
+        str = pretty(str);
+        console.log(str);
+        cleaner.clean(u, function (html) {
+            console.log(html);
+        });
+
+        this.xmlContent = str;
         // this.formatXml();
         this.updateXmlLineNumbers();
     }
@@ -48,7 +75,7 @@ export class HTMLDialog implements OnInit, AfterViewChecked, OnDestroy {
     }
 
     initModeler(): void {
-        
+
     }
 
     handleError(err: any): any {

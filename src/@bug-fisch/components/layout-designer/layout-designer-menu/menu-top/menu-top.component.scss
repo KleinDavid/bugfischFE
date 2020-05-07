@@ -1,4 +1,69 @@
 #atled-layout-designer-menu-top {
   height: 36px;
-  background-image:linear-gradient(to right,#dcdcdc, white);
+  background-image: linear-gradient(to right, #dcdcdc, white);
+  border-bottom: 2px solid #c9c9c9;
+
+  .menu-top-icon {
+    cursor: pointer;
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .menu-top-icon-small {
+    cursor: pointer;
+    text-align: center;
+    margin-top: 4px;
+    font-size: 30px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .menu-top-title {
+    font-variant: small-caps;
+    font-weight: bold;
+    cursor: default;
+    display: table-cell;
+  }
+
+  .menu-top-title:hover {
+    background-color: none;
+  }
+
+  .menu-top-icon:hover {
+    background-color: #c9c9c9;
+  }
+
+  .menu-top-icon-active {
+    background-color: #c9c9c9;
+  }
+
+  .menu-top-text-box {
+    height: 36px;
+    display: table;
+    text-align: center;
+
+    .menu-top-text-click {
+      cursor: pointer;
+      display: table-cell;
+      vertical-align: middle;
+      font-size: 24px;
+      font-weight: bold;
+    }
+
+    .menu-top-text {
+      display: table-cell;
+      vertical-align: middle;
+      font-size: 24px;
+      font-weight: bold;
+    }
+  }
+
+  .vertical-line-left {
+    width: 2px;
+    border-right: 1px solid #c9c9c9;
+  }
+  .vertical-line-right {
+    width: 3px;
+  }
 }

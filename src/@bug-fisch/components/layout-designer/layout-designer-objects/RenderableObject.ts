@@ -1,21 +1,23 @@
 import { Subject, Observable } from "rxjs";
-import { TransformRect } from './RenderableObjects/TransformRect';
 import { Position } from './Position';
 import { TransformableObject } from './RenderableObjects/TransformableObject';
+import { CssClass } from './CssClass';
 
 export abstract class RenderableObject {
-
-  width: number;
-  height: number;
-  borderRadius: number = 0;
+  
   position: Position;
+  width: number;
+  height: number; 
   borderWidth: number = 0;
+  
+  borderRadius: number = 0;
   borderColor: string = 'black';
   cursor: string = 'default';
   backgroundColor = 'none';
   borderStyle: string = 'solid';
   zIndex: number = 0;
   overflow: string = 'hidden';
+  
   id: string = '';
 
   protected parent: TransformableObject;
@@ -24,14 +26,23 @@ export abstract class RenderableObject {
   protected childList: TransformableObject[] = [];
 
   protected htmlElementRef: HTMLElement;
+  protected styleSheetPosition: HTMLStyleElement;
+  protected styleSheet: HTMLStyleElement;
+
+  cssClassList: CssClass[] = [];
+  cssClassPosition: CssClass = new CssClass();
 
   constructor() {
     this.position = new Position();
     this.height = 0;
     this.width = 0;
+
+
   }
 
   create(): void {
+    this.htmlElementRef = document.getElementById(this.id);
+    this.id = !this.htmlElementRef ? this.id : this.id + '-1';
     this.htmlElementRef = document.createElement('div');
     this.htmlElementRef.id = this.id;
     document.getElementById(this.parent.id).appendChild(this.htmlElementRef);
@@ -55,6 +66,7 @@ export abstract class RenderableObject {
   delete(): void {
     let elem = document.getElementById(this.id);
     elem ? elem.parentNode.removeChild(elem) : '';
+    this.styleSheet ? this.styleSheet.parentNode.removeChild(this.styleSheet) : '';
   }
 
   addChild(child: TransformableObject, absolute: boolean = false) {

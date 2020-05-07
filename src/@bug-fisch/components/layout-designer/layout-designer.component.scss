@@ -5,7 +5,6 @@
 
 #atled-layout-designer {
   height: 100%;
-  border: 1px solid blue;
 
   display: flex;
   flex-direction: column;
@@ -115,6 +114,7 @@
 }
 
 ::ng-deep .textFieldInput {
+  overflow: auto;
   font-family: "Gotham Light";
   border: 0;
   appearance: none;

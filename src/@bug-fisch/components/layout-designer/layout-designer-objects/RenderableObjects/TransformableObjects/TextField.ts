@@ -9,39 +9,58 @@ export class TextField extends TransformableObject {
 
     backgroundColor = 'none';
     typeName = 'Text';
-    text = 'hallo';
+    text = '';
 
     fontStyle: string = 'normal';
     fontVariant: string = 'normal';
     fontWeight: string = 'normal';
-    fontSize: number = 10;
+    fontSize: number = 20;
     fontFamily: string = '';
     textAlign: string = 'left';
     verticalAlign: string = 'top';
+    lineHeight: number = 24;
+    textDecoration: string = 'none';
 
-    fontStyleProperties = ['normal', 'italic', 'oblique', 'initial', 'inherit'];
-    fontVariantProperties = ['normal', 'small-caps', 'initial', 'inherit'];
-    fontWeightPropertiesNotFixed = ['normal', 'bold', 'bolder', 'lighter', 'number', 'initial', 'inherit'];
-    fontSizePropertiesNotFixed = ['medium', 'xx-small', 'x-small', 'small', 'large', 'x-large', 'xx-large', 'smaller', 'larger', 'length', 'initial', 'inherit']
+    fontStyleProperties = ['normal', 'italic', 'oblique'];
+    fontVariantProperties = ['normal', 'small-caps'];
+    fontWeightPropertiesNotFixed = ['normal', 'bold', 'bolder', 'lighter'];
+    // fontSizePropertiesNotFixed = ['medium', 'xx-small', 'x-small', 'small', 'large', 'x-large', 'xx-large', 'smaller', 'larger']
     fontFamilyProperties = [];
-    textAlignProperties = ['right', 'center', 'left', 'justify'];
+    textAlignProperties = ['left', 'center', 'right', 'justify'];
     verticalAlignProperties = ['top', 'middle', 'bottom'];
+
+    editableProperties = ['position.x', 'position.y', 'width', 'height', 'zIndex', 'fontSize', 'lineHeight', 'verticalAlign', 'fontVariant'];
+    chanceableProperties = ['fontWeight', 'fontStyle', 'textDecoration', 'textAlign', 'fontFamily']
+    halfStyleProperties: string[] = ['position.x', 'position.y', 'width', 'height', 'fontSize', 'lineHeight'];
 
     private tableCellDivRef: HTMLElement;
     private textareaElementRef: HTMLTextAreaElement;
 
     constructor(id: string) {
         super(id);
-        this.editableProperties = ['position.x', 'position.y', 'width', 'height', 'fontStyle', 'fontVariant', 'fontWeight', 'fontSize', 'fontFamily', 'textAlign', 'verticalAlign'];
     }
 
     create(): void {
+
+        this.styleSheet = document.createElement('style');
+        this.styleSheet.type = 'text/css';
+        this.styleSheet.innerHTML = this.getCss();
+        let documentHead = document.getElementsByTagName('head')[0];
+        documentHead.insertBefore(this.styleSheet, documentHead.firstChild);
+
         this.htmlElementRef = document.createElement('div');
         this.htmlElementRef.id = this.id;
+        this.cssClassList.forEach(c => {
+            this.htmlElementRef.classList.add(c.name);
+        });
+        this.htmlElementRef.classList.add(this.type + '-' + this.id);
+
 
         this.tableCellDivRef = document.createElement('div');
+        this.tableCellDivRef.style.wordWrap = 'break-word;';
         this.textareaElementRef = document.createElement('textarea');
         this.textareaElementRef.addEventListener('keyup', this.onInput.bind(this));
+        this.textareaElementRef.placeholder = 'text'
 
         this.htmlElementRef.appendChild(this.tableCellDivRef);
 
@@ -50,52 +69,40 @@ export class TextField extends TransformableObject {
     }
 
     render(): void {
-        this.htmlElementRef.style.position = 'absolute';
+        if (!this.styleSheet) { return; }
+        this.styleSheet.innerHTML = this.getCss();
 
-        this.htmlElementRef.style.height = (this.height) + 'px';
-        this.htmlElementRef.style.width = (this.width) + 'px';
-        this.htmlElementRef.style.top = this.position.y + 'px';
-        this.htmlElementRef.style.left = this.position.x + 'px';
-        this.htmlElementRef.style.zIndex = this.zIndex + '';
-        this.htmlElementRef.style.overflow = 'hidden';
-
-        this.htmlElementRef.style.fontStyle = this.fontStyle;
-        this.htmlElementRef.style.fontVariant = this.fontVariant;
-        this.htmlElementRef.style.fontWeight = this.fontWeight;
-        this.htmlElementRef.style.fontSize = this.fontSize + '';
-        this.htmlElementRef.style.fontFamily = this.fontFamily;
-        this.htmlElementRef.style.textAlign = this.textAlign;
-        this.htmlElementRef.style.display = 'table';
-
-        this.htmlElementRef.style.cursor = this.cursor;
-
-        this.textareaElementRef.style.width = this.width + 'px';
+        this.textareaElementRef.style.width = '100%';
 
         this.tableCellDivRef.style.display = 'table-cell';
         this.tableCellDivRef.style.verticalAlign = this.verticalAlign;
+        this.tableCellDivRef.style.lineHeight = this.lineHeight + 'px';
+
+        if (this.selected) {
+            this.textareaElementRef.id = this.id + '-input';
+            this.textareaElementRef.classList.add('textFieldInput');
+            this.textareaElementRef.rows = this.text.split(/<br\s*[\/]?>/gi).length + 1
+            this.textareaElementRef.innerHTML = this.text.replace(/<br\s*[\/]?>/gi, '\n');
+
+            this.textareaElementRef.style.fontStyle = this.fontStyle;
+            this.textareaElementRef.style.fontVariant = this.fontVariant;
+            this.textareaElementRef.style.fontWeight = this.fontWeight;
+            this.textareaElementRef.style.fontSize = this.fontSize + 'px';
+            this.textareaElementRef.style.fontFamily = '"' +this.fontFamily + '"';
+            this.textareaElementRef.style.textAlign = this.textAlign;
+            this.textareaElementRef.style.lineHeight = this.lineHeight + 'px';
+            this.textareaElementRef.style.textDecoration = this.textDecoration;
+        }
     }
 
     select() {
-        if(this.selected){
+        if (this.selected) {
             return;
         }
-        super.select();
-
-        this.textareaElementRef.id = this.id + '-input';
-        this.textareaElementRef.classList.add('textFieldInput');
-        this.textareaElementRef.rows = this.text.split(/<br\s*[\/]?>/gi).length + 1
-        this.textareaElementRef.innerHTML = this.text.replace(/<br\s*[\/]?>/gi, '\n');
-
-        this.textareaElementRef.style.fontStyle = this.fontStyle;
-        this.textareaElementRef.style.fontVariant = this.fontVariant;
-        this.textareaElementRef.style.fontWeight = this.fontWeight;
-        this.textareaElementRef.style.fontSize = this.fontSize + '';
-        this.textareaElementRef.style.fontFamily = this.fontFamily;
-        this.textareaElementRef.style.textAlign = this.textAlign;
-        this.textareaElementRef.focus();
-
         this.tableCellDivRef.innerHTML = '';
         this.tableCellDivRef.appendChild(this.textareaElementRef);
+        super.select();
+        this.render();
     }
 
     unselect() {
@@ -120,8 +127,8 @@ export class TextField extends TransformableObject {
         div.style.fontStyle = this.fontStyle;
         div.style.fontVariant = this.fontVariant;
         div.style.fontWeight = this.fontWeight;
-        div.style.fontSize = this.fontSize + '';
-        div.style.fontFamily = this.fontFamily;
+        div.style.fontSize = this.fontSize + 'px';
+        div.style.fontFamily ='"'+ this.fontFamily+'"';
         div.style.textAlign = this.textAlign;
         div.style.display = 'table';
 
@@ -145,8 +152,8 @@ export class TextField extends TransformableObject {
             input.style.fontStyle = this.fontStyle;
             input.style.fontVariant = this.fontVariant;
             input.style.fontWeight = this.fontWeight;
-            input.style.fontSize = this.fontSize + '';
-            input.style.fontFamily = this.fontFamily;
+            input.style.fontSize = this.fontSize + 'px';
+            input.style.fontFamily = '"' +this.fontFamily +'"';
             input.style.textAlign = this.textAlign;
 
             div2.appendChild(input);
@@ -171,9 +178,28 @@ export class TextField extends TransformableObject {
     }
 
     private onInput(event: any): void {
+        if (this.textareaElementRef.scrollTop > 0) {
+            this.textareaElementRef.style.height = 'auto';
+            this.textareaElementRef.style.height = this.textareaElementRef.scrollHeight + 'px';
+            // let words = event.target.value.split(' ');
+            // words[words.length - 1] = '\n' + words[words.length - 1]
+            // let nextValue = '';
+            // for(let i = 0; i < words.length - 1; i++){
+            //     nextValue += words[i] + ' ';
+            // }
+            // nextValue += words[words.length - 1];
+            // event.target.value = nextValue;
+        }
+        if (this.textareaElementRef.scrollLeft > 0) {
+            this.textareaElementRef.style.width = 'auto';
+            this.textareaElementRef.style.width = this.textareaElementRef.scrollWidth + 'px';
+        }
         this.text = event.target.value;
+        console.log(this.textareaElementRef.scrollTop > 0);
+
         this.text = this.text.replace(/\n\r?/g, '<br />');
-        event.target.style.height = (event.target.scrollHeight) + 'px';
+        // this.textareaElementRef.style.height = ((this.text.split('<br />').length) * this.lineHeight) + 'px';
+        // event.target.style.height = (event.target.scrollHeight) + 'px';
     }
 
     addFunctions(document: Document): void {
@@ -187,10 +213,43 @@ export class TextField extends TransformableObject {
     getCopy(): TextField {
         let copyedObject: TextField = new TextField('');
         for (let key in this) {
-            if (key !== 'changedSubject') {
+            if (key !== 'changedSubject' && key !== 'transformRects' && key !== 'parent') {
                 copyedObject[key.toString()] = JSON.parse(JSON.stringify(this[key]));
             }
         }
         return copyedObject;
+    }
+
+    getCss(): string {
+        let res = '.' + this.type + '-' + this.id + '{\n';
+        res += this.getInnerCss();
+        res += '}\n\n';
+        return res;
+    }
+
+    private getInnerCss(): string {
+        let res = ''
+        res += 'position: ' + 'absolute' + ';\n';
+
+        res += 'height: ' + Math.round(this.height) + 'px' + ';\n';
+        res += 'width: ' + Math.round(this.width) + 'px' + ';\n';
+        res += 'max-width: ' + Math.round(this.width) + 'px' + ';\n';
+        res += 'top: ' + Math.round(this.position.y) + 'px' + ';\n';
+        res += 'left: ' + Math.round(this.position.x) + 'px' + ';\n';
+        res += 'z-index: ' + this.zIndex + '' + ';\n';
+        res += 'overflow: ' + 'hidden' + ';\n';
+
+        res += 'font-style: ' + this.fontStyle + ';\n';
+        res += 'font-variant: ' + this.fontVariant + ';\n';
+        res += 'font-weight: ' + this.fontWeight + ';\n';
+        res += 'font-size: ' + this.fontSize + 'px' + ';\n';
+        res += 'font-family: "' + this.fontFamily + '";\n';
+        res += 'text-align: ' + this.textAlign + ';\n';
+        res += 'display: ' + 'table' + ';\n';
+        res += 'overflow: hidden;';
+        res += 'text-decoration: ' + this.textDecoration + ';\n';
+
+        res += 'cursor: ' + this.cursor + ';\n';
+        return res;
     }
 }

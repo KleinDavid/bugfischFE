@@ -1,18 +1,99 @@
 #atled-layout-designer-menu-right {
   background-color: #e5e5e5;
   height: 100%;
+  border-left: 1px solid #c9c9c9;
 
   display: flex;
   flex-direction: column;
 
   .menu-properties {
-    overflow-y: auto;
+    overflow-y: overlay;
     flex: 1 1 auto;
+  }
+
+  ::ng-deep .mat-tab-group {
+    height: 100%;
+    ::ng-deep .mat-tab-body-wrapper {
+      height: 100%;
+      ::ng-deep .mat-tab-body-content {
+        position: absolute;
+      }
+    }
   }
 
   .menu-right-inner {
     width: 100%;
-    padding: 24px;
+    padding-left: 24px;
+    padding-top: 24px;
+    padding-bottom: 24px;
+    padding-right: 24px;
+    //padding-top: 24px;
+
+    .padding-right {
+      padding-right: 6px;
+    }
+
+    .padding-left {
+      padding-left: 6px;
+    }
+
+    .click-icon {
+      cursor: pointer;
+    }
+
+    .table {
+      display: table;
+      height: 100%;
+
+      .table-cell {
+        display: table-cell;
+        vertical-align: middle;
+        height: 100%;
+      }
+    }
+
+    .vertical-center-box {
+      position: relative;
+
+      .vertical-center {
+        left: 50%;
+        width: 100%;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    .full-width {
+      width: 100%;
+    }
+
+    .click-icon:hover {
+      color: red;
+    }
+
+    .add-icon {
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .add-icon:hover {
+      color: green;
+    }
+
+    .global-class-cell {
+      border-bottom: 1px solid #c9c9c9;
+      cursor: pointer;
+    }
+
+    .global-class-cell:hover {
+      background-color: #dcdcdc;
+    }
+
+    .class-list {
+      margin-top: -20px;
+      z-index: 1;
+    }
   }
 
   .radio {
@@ -26,7 +107,7 @@
     top: -14px;
   }
 
-  ::ng-deep .mat-form-field-appearance-legacy .mat-form-field-wrapper{
+  ::ng-deep .mat-form-field-appearance-legacy .mat-form-field-wrapper {
     margin-top: -8px;
     padding-bottom: 15px;
   }
@@ -41,7 +122,9 @@
   .menu-right-inner-title {
     background-color: #dcdcdc;
     width: 100%;
-    padding: 24px;
+    padding: 12px;
+    padding-right: 24px;
+    padding-left: 24px;
 
     .menu-right-title {
       font-size: 24px;
@@ -68,6 +151,6 @@
   display: none;
 }
 
-::ng-deep .inputAndSelect .mat-select-trigger{
+::ng-deep .inputAndSelect .mat-select-trigger {
   float: right;
 }

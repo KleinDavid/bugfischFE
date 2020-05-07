@@ -3,20 +3,28 @@ import { ZoomableObject } from '../ZoomableObject';
 import { Position } from '../Position';
 
 export class IdCard extends TransformableObject implements ZoomableObject {
-  type: string;
-  icon: string;
+  type: string = 'idCard';
+  icon: string = 'web';
 
   borderWidth = 1;
   borderRadius = 20;
   typeName = 'Arbeitsbereich';
-  overflow = 'visible'
+  overflow = 'visible';
+  curser = 'default';
 
   editableProperties = ['backgroundColor'];
+
+  constructor(id: string) {
+    super(id);
+    this.positionAndSizeChanceSubject.subscribe(() => {
+      this.render();
+    })
+  }
 
   create(): void {
     this.htmlElementRef = document.createElement('div');
     this.htmlElementRef.id = this.id;
-   document.getElementById('cardBoundary').appendChild(this.htmlElementRef);
+    document.getElementById('cardBoundary').appendChild(this.htmlElementRef);
     this.render();
   }
 
@@ -28,9 +36,8 @@ export class IdCard extends TransformableObject implements ZoomableObject {
     this.htmlElementRef.style.left = this.position.x + 'px';
     this.htmlElementRef.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
     this.htmlElementRef.style.borderRadius = this.borderRadius + 'px';
-    this.htmlElementRef.style.cursor = this.cursor;
     this.htmlElementRef.style.backgroundColor = this.backgroundColor;
-    this.htmlElementRef.style.zIndex = this.zIndex + '';
+    this.htmlElementRef.style.zIndex = 10 + '';
     this.htmlElementRef.style.overflow = this.overflow;
   }
 
@@ -93,11 +100,14 @@ export class IdCard extends TransformableObject implements ZoomableObject {
     })
     let oldOverflow = this.overflow;
     this.overflow = 'hidden';
-    let result = this.getHTML();
+    this.render();
+  
+    let result = this.htmlElementRef.outerHTML;
     if (selectedObject) { selectedObject.select() }
     this.overflow = oldOverflow;
     this.position.x = x;
     this.position.y = y;
+    this.render();
     return result;
   }
 
@@ -121,5 +131,9 @@ export class IdCard extends TransformableObject implements ZoomableObject {
 
   getCopy(): TransformableObject {
     return null;
+  }
+
+  getHtml(): string {
+    return this.htmlElementRef.outerHTML;
   }
 }

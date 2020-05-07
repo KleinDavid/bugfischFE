@@ -1,0 +1,39 @@
+.global-classes-dialog .mat-dialog-container {
+
+  width: 800px !important;
+  height: auto;
+  overflow: hidden;
+
+  .global-class-cell {
+    border-bottom: 1px solid #e5e5e5;
+    cursor: pointer;
+  }
+
+  .global-class-cell:hover {
+    background-color: #dcdcdc;
+  }
+  
+  .class-list{
+    margin-top: -20px;
+    z-index: 1;
+  }
+
+  .selectedClass {
+    background-color: #dcdcdc;
+  }
+
+  .border-left {
+    border-left: 1px solid #dcdcdc;
+  }
+}
+
+.mat-dialog-container {
+  padding: 12px;
+
+  .mat-toolbar {
+    flex: 1 0 auto;
+    min-height: initial;
+  }
+
+}
+

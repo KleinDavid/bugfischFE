@@ -1,10 +1,10 @@
 import { RenderableObject } from '../RenderableObject';
 import { LayoutDesignerlEditMode } from '../Enums';
 import { TransformRect } from './TransformRect';
-import { EditField } from './EditField';
 import { Position } from '../Position';
 import { Subject } from 'rxjs';
 import { Transformation } from '../Transformation';
+import { CssClass } from '../CssClass';
 
 export abstract class TransformableObject extends RenderableObject {
 
@@ -15,13 +15,13 @@ export abstract class TransformableObject extends RenderableObject {
   id: string;
   editMode: LayoutDesignerlEditMode = LayoutDesignerlEditMode.None;
   editableProperties: string[] = ['position.x', 'position.y', 'width', 'height', 'borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'backgroundColor'];
+  chanceableProperties: string[] = []
+  halfStyleProperties: string[] = [];
 
   abstract type: string;
   abstract typeName: string;
   abstract icon: string;
-
-  // noRender = false;
-
+  
   relativeWidthToParent: number;
   relativeHeightToParent: number;
   relativePositionToParent: Position;
@@ -337,9 +337,36 @@ export abstract class TransformableObject extends RenderableObject {
 
   addCurrentObjectValues(defaultObject: TransformableObject) {
     defaultObject.editableProperties.forEach(p => { this[p] = defaultObject[p] });
+    defaultObject.chanceableProperties.forEach(p => { this[p] = defaultObject[p] });
   }
 
   getPositionAndSizeChanceSubject(): Subject<Transformation> {
     return this.positionAndSizeChanceSubject;
+  }
+
+  addClass(cssClass: CssClass): void {
+    this.cssClassList.push(cssClass);
+    this.updateClasses();
+  }
+
+  removeCssClass(cssClass: CssClass): void {
+    this.cssClassList = this.cssClassList.filter(c => c !== cssClass);
+    this.htmlElementRef.className = '';
+    this.htmlElementRef.classList.add(this.type + '-' + this.id);
+    this.cssClassList.forEach(c => {
+      this.htmlElementRef.classList.add(c.name);
+    });
+  }
+
+  updateClasses(): void {
+    this.htmlElementRef.className = '';
+    this.htmlElementRef.classList.add(this.type + '-' + this.id);
+    this.cssClassList.forEach(c => {
+      this.htmlElementRef.classList.add(c.name);
+    });
+  }
+
+  getCss():string {
+    return ''
   }
 }

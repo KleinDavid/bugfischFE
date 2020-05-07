@@ -1,3 +1,124 @@
+<input id="fontUploader" display="none" hidden type="file" accept=".ttf" (change)="handleFontFileInput($event)" />
 <div id="atled-layout-designer-menu-top">
-    <div (click)="clickMenu(1)">HTML</div>
+    <div fxLayout="row">
+        <div fxFlex="72px" (click)="clickMenu(1)" class="menu-top-text-box menu-top-title">
+            <div class="menu-top-text">Menu</div>
+        </div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+        <div fxFlex="36px"></div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+        <div fxFlex="36px">
+            <mat-icon id="menu-left-icon1" class="menu-top-icon" (click)="clickMenu(1)" fxFlex
+                [ngClass]="'menu-left-icon-active'">undo</mat-icon>
+        </div>
+        <div fxFlex="36px">
+            <mat-icon id="menu-left-icon1" class="menu-top-icon" (click)="clickMenu(1)" fxFlex
+                [ngClass]="'menu-left-icon-active'">redo</mat-icon>
+        </div>
+
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+        <div fxFlex="36px"></div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+        <div fxFlex="36px">
+            <mat-icon id="menu-left-icon1" class="menu-top-icon" (click)="setCardDirection(0)" fxFlex
+                [ngClass]="cardDirection == 0 ? 'menu-top-icon-active' : ''">crop_landscape</mat-icon>
+        </div>
+        <div fxFlex="36px">
+            <mat-icon id="menu-left-icon1" class="menu-top-icon" (click)="setCardDirection(1)" fxFlex
+                [ngClass]="cardDirection == 1 ? 'menu-top-icon-active' : ''">crop_portrait</mat-icon>
+        </div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+
+        <div fxFlex="36px">
+            <mat-icon id="menu-left-icon1" class="menu-top-icon" (click)="setVisible()" fxFlex
+                [ngClass]="'menu-left-icon-active'">{{visible ? 'visibility' : 'visibility_off'}}</mat-icon>
+        </div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+        <div fxFlex="36px"></div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+        <div fxFlex="36px">
+            <div class="menu-top-icon" [ngClass]="isBold() ? 'menu-top-icon-active' : ''">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onBoldClick()" fxFlex>format_bold
+                </mat-icon>
+            </div>
+        </div>
+        <div fxFlex="36px">
+            <div class="menu-top-icon" [ngClass]="isItalic() ? 'menu-top-icon-active' : ''">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onItalicClick()" fxFlex>
+                    format_italic</mat-icon>
+            </div>
+        </div>
+        <div fxFlex="36px">
+            <div class="menu-top-icon" [ngClass]="isUnderlined() ? 'menu-top-icon-active' : ''">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onUnderlinedClick()" fxFlex>
+                    format_underlined</mat-icon>
+            </div>
+        </div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+        <div fxFlex="36px">
+            <div class="menu-top-icon" [ngClass]="isAlign('left') ? 'menu-top-icon-active' : ''">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onAlignButtonClick('left')" fxFlex
+                    [ngClass]="'menu-left-icon-active'">format_align_left</mat-icon>
+            </div>
+        </div>
+        <div fxFlex="36px">
+            <div class="menu-top-icon" [ngClass]="isAlign('center') ? 'menu-top-icon-active' : ''">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onAlignButtonClick('center')" fxFlex
+                    [ngClass]="'menu-left-icon-active'">format_align_center</mat-icon>
+            </div>
+        </div>
+        <div fxFlex="36px">
+            <div class="menu-top-icon" [ngClass]="isAlign('right') ? 'menu-top-icon-active' : ''">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onAlignButtonClick('right')" fxFlex
+                    [ngClass]="'menu-left-icon-active'">format_align_right</mat-icon>
+            </div>
+        </div>
+        <div fxFlex="36px">
+            <div class="menu-top-icon" [ngClass]="isAlign('justify') ? 'menu-top-icon-active' : ''">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onAlignButtonClick('justify')"
+                    fxFlex [ngClass]="'menu-left-icon-active'">format_align_justify</mat-icon>
+            </div>
+        </div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+        <div fxFlex="144px">
+            <mat-form-field style="width: 100%" (click)='$event.stopPropagation()'>
+                <mat-label>FontFamily</mat-label>
+                <mat-select (openedChange)="disableLayoutDesinger.emit($event)"
+                    (selectionChange)="onFontFamilyChange($event.value)" [value]="getFont()">
+                    <mat-option *ngFor="let font of fonts" [value]="font">
+                        {{font}}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <div fxFlex="36px">
+            <div class="menu-top-icon">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onUploadFontClick()" fxFlex
+                    [ngClass]="'menu-left-icon-active'">folder_open</mat-icon>
+            </div>
+        </div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+        <div fxFlex="36px"></div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+        <div fxFlex="72px" (click)="openHtmlDialog()" class="menu-top-text-box menu-top-icon menu-top-title">
+            <div class="menu-top-text-click">Html</div>
+        </div>
+        <div fxFlex="72px" (click)="openCssDialog()" class="menu-top-text-box menu-top-icon menu-top-title">
+            <div class="menu-top-text-click">Css</div>
+        </div>
+        <div class="vertical-line-left"></div>
+        <div class="vertical-line-right"></div>
+    </div>
+
 </div>

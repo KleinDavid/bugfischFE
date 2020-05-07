@@ -6,7 +6,9 @@ export class Circle extends TransformableObject {
     type = 'Circle'
     backgroundColor = '#8a7f8d';
     typeName = 'Kreis';
-    editableProperties = ['position.x', 'position.y', 'height', 'width', 'borderWidth', 'borderColor', 'backgroundColor'];
+    editableProperties = ['position.x', 'position.y', 'width', 'height' , 'borderWidth', 'borderColor', 'backgroundColor'];
+
+    halfStyleProperties: string[] = ['position.x', 'position.y', 'width', 'height'];
 
     private svgElementRef: SVGElement;
     private ellipseElementRef: SVGElement;
@@ -17,8 +19,18 @@ export class Circle extends TransformableObject {
     }
 
     create(): void {
+        this.styleSheet = document.createElement('style');
+        this.styleSheet.type = 'text/css';
+        this.styleSheet.innerHTML = this.getCss();
+        let documentHead = document.getElementsByTagName('head')[0];
+        documentHead.insertBefore(this.styleSheet, documentHead.firstChild);
+
         this.htmlElementRef = document.createElement('div');
         this.htmlElementRef.id = this.id;
+        this.cssClassList.forEach(c => {
+            this.htmlElementRef.classList.add(c.name);
+        });
+        this.htmlElementRef.classList.add(this.type + '-' + this.id);
 
         this.svgElementRef = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         this.ellipseElementRef = document.createElementNS('http://www.w3.org/2000/svg', 'ellipse');
@@ -31,16 +43,8 @@ export class Circle extends TransformableObject {
     }
 
     render(): void {
-        this.htmlElementRef.style.position = 'absolute';
-
-        this.htmlElementRef.style.height = (this.height + this.borderWidth * 2) + 'px';
-        this.htmlElementRef.style.width = (this.width + this.borderWidth * 2) + 'px';
-        this.htmlElementRef.style.top = this.position.y + 'px';
-        this.htmlElementRef.style.left = this.position.x + 'px';
-        this.htmlElementRef.style.zIndex = this.zIndex + '';
-
-        this.htmlElementRef.style.cursor = this.cursor;
-        this.htmlElementRef.id = this.id;
+        if (!this.styleSheet) { return; }
+        this.styleSheet.innerHTML = this.getCss();
 
         this.svgElementRef.setAttribute('height', (this.height + this.borderWidth * 2) + 'px');
         this.svgElementRef.setAttribute('width', (this.width + this.borderWidth * 2) + 'px');
@@ -58,7 +62,7 @@ export class Circle extends TransformableObject {
 
         //this.svgElementRef.appendChild(this.ellipseElementRef);
         //this.htmlElementRef.appendChild(this.svgElementRef);
-       //  this.htmlElementRef.outerHTML = this.getHTML();
+        //  this.htmlElementRef.outerHTML = this.getHTML();
     }
 
     transform(position: Position) {
@@ -113,10 +117,29 @@ export class Circle extends TransformableObject {
     getCopy(): Circle {
         let copyedObject: Circle = new Circle('');
         for (let key in this) {
-            if (key !== 'changedSubject') {
+            if (key !== 'changedSubject' && key !== 'transformRects' && key !== 'parent') {
                 copyedObject[key.toString()] = JSON.parse(JSON.stringify(this[key]));
             }
         }
         return copyedObject;
+    }
+
+    getCss(): string {
+        let res = '.' + this.type + '-' + this.id + '{\n';
+        res += this.getInnerCss();
+        res += '}\n\n';
+        return res;
+    }
+
+    private getInnerCss(): string {
+        let res = ''
+        res += 'position: ' + 'absolute;\n';
+        res += 'height: ' + Math.round(this.height + this.borderWidth * 2) + 'px;\n';
+        res += 'width: ' + Math.round(this.width + this.borderWidth * 2) + 'px;\n';
+        res += 'top: ' + Math.round(this.position.y) + 'px;\n';
+        res += 'left: ' + Math.round(this.position.x) + 'px;\n';
+        res += 'z-index: ' + this.zIndex + ';\n';
+        res += 'cursor: ' + this.cursor + ';\n';
+        return res;
     }
 }

@@ -5,7 +5,7 @@ export class TransformRect extends RenderableObject {
     type: string;
     typeName: string;
     icon: string;
-    zIndex = 1000;
+    zIndex = 1001;
     
     backgroundColor = '#91a3b0';
     

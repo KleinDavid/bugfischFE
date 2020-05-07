@@ -16,9 +16,10 @@ export class EditableImage extends TransformableObject {
 
   simpleImageBoxRef: HTMLElement;
   simpleImageRef: HTMLImageElement;
-  imageNoDragElement: HTMLElement;
 
   editableProperties: string[] = ['position.x', 'position.y', 'width', 'height', 'zIndex', 'borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'backgroundColor'];
+  halfStyleProperties: string[] = ['position.x', 'position.y', 'width', 'height'];
+
 
   private wontToCreate: boolean = false;
   private imageLoaded: boolean = false;
@@ -51,44 +52,46 @@ export class EditableImage extends TransformableObject {
     i.src = imageSrc;
 
     this.positionAndSizeChanceSubject.subscribe(transformation => {
-      if(transformation.propertyName === 'imagePosition'){
+      if (transformation.propertyName === 'imagePosition') {
         this.setImagePosition(transformation.valueAfter);
       }
     })
   }
 
   create(): void {
-    if(!this.imageLoaded){
+    if (!this.imageLoaded) {
       this.wontToCreate = true;
       return;
     }
-    if(!this.wontToCreate){
+    if (!this.wontToCreate) {
       return;
     }
-    if(this.selected){
+    if (this.selected) {
       this.select();
     }
 
+    this.styleSheet = document.createElement('style');
+    this.styleSheet.type = 'text/css';
+    this.styleSheet.innerHTML = this.getCss();
+    let documentHead = document.getElementsByTagName('head')[0];
+    documentHead.insertBefore(this.styleSheet, documentHead.firstChild);
+
     this.htmlElementRef = document.createElement('div');
+    this.htmlElementRef.id = this.id;
+    this.cssClassList.forEach(c => {
+      this.htmlElementRef.classList.add(c.name);
+    }); 
+    this.htmlElementRef.classList.add(this.type + '-' + this.id);
 
     this.simpleImageBoxRef = document.createElement('div');
     this.simpleImageRef = document.createElement('img');
-    this.imageNoDragElement = document.createElement('div');
 
     this.simpleImageBoxRef.classList.add('simple-image-box');
 
     this.simpleImageRef.classList.add('simple-image');
     this.simpleImageRef.src = this.imageSrcBase64;
 
-    this.imageNoDragElement.style.zIndex = (this.zIndex + 1) + '';
-    this.imageNoDragElement.style.width = '100%';
-    this.imageNoDragElement.style.height = '100%';
-    this.imageNoDragElement.style.position = 'absolute';
-
     this.simpleImageBoxRef.appendChild(this.simpleImageRef);
-    this.simpleImageBoxRef.appendChild(this.imageNoDragElement);
-
-    this.htmlElementRef.id = this.id;
 
     this.setImagePosition(this.imagePosition);
 
@@ -97,19 +100,8 @@ export class EditableImage extends TransformableObject {
   }
 
   render(): void {
-    this.htmlElementRef.style.position = 'absolute';
-
-    this.htmlElementRef.style.height = this.height + 'px';
-    this.htmlElementRef.style.width = this.width + 'px';
-    this.htmlElementRef.style.top = this.position.y + 'px';
-    this.htmlElementRef.style.left = this.position.x + 'px';
-    this.htmlElementRef.style.zIndex = this.zIndex + '';
-
-    this.htmlElementRef.style.borderRadius = this.borderRadius + 'px';
-    this.htmlElementRef.style.cursor = this.cursor;
-    this.htmlElementRef.style.backgroundColor = this.backgroundColor;
-    this.htmlElementRef.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
-    this.htmlElementRef.id = this.id;
+    if (!this.styleSheet) { return; }
+    this.styleSheet.innerHTML = this.getCss();
   }
 
   private setImagePosition(value: LayoutDesignerImagePosition) {
@@ -201,14 +193,13 @@ export class EditableImage extends TransformableObject {
       })
       return resString;
     }
-
     return div.outerHTML;
   }
 
   getCopy(): EditableImage {
     let copyedObject: EditableImage = new EditableImage('', '', new IdCard(''));
     for (let key in this) {
-      if (key !== 'changedSubject') {
+      if (key !== 'changedSubject' && key !== 'transformRects' && key !== 'parent' && key !== 'positionAndSizeChanceSubject') {
         copyedObject[key.toString()] = JSON.parse(JSON.stringify(this[key]));
       }
     }
@@ -218,5 +209,28 @@ export class EditableImage extends TransformableObject {
   transform(position: Position) {
     super.transform(position);
     this.render();
+  }
+
+
+  getCss(): string {
+    let res = '.' + this.type + '-' + this.id + '{\n';
+    res += this.getInnerCss();
+    res += '}\n\n';
+    return res;
+  }
+
+  private getInnerCss(): string {
+    let res = ''
+    res += 'position: ' + 'absolute' + ';\n';
+    res += 'height: ' + Math.round(this.height) + 'px' + ';\n';
+    res += 'width: ' + Math.round(this.width) + 'px' + ';\n';
+    res += 'top: ' + Math.round(this.position.y) + 'px' + ';\n';
+    res += 'left: ' + Math.round(this.position.x) + 'px' + ';\n';
+    res += 'z-index: ' + this.zIndex + '' + ';\n';
+    res += 'border-radius: ' + this.borderRadius + 'px' + ';\n';
+    res += 'cursor: ' + this.cursor + ';\n';
+    res += 'background-color: ' + this.backgroundColor + ';\n';
+    res += 'border: ' + this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor + ';\n';
+    return res;
   }
 }

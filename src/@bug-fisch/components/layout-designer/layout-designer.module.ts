@@ -15,6 +15,9 @@ import { LayoutDesignerMenuModule } from './layout-designer-menu/layout-designer
 import { LayoutDesignerComponent } from './layout-designer.component';
 import { HTMLDialog } from './html-dialog/html-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
+import { CSSDialog } from './dialogs/css-dialog/css-dialog.component';
+import { FormsModule } from '@angular/forms';
+import { CSSGlobalDialog } from './dialogs/css-global-dialog/css-global-dialog.component';
 
 @NgModule({
     imports: [
@@ -28,6 +31,8 @@ import { MatDialogModule } from '@angular/material/dialog';
         MatDialogModule,
         YouTubePlayerModule,
         LayoutDesignerMenuModule,
+        FormsModule,
+        MatButtonModule,
 
         MatFormFieldModule,
         BugFischSharedModule,
@@ -36,12 +41,16 @@ import { MatDialogModule } from '@angular/material/dialog';
     ],
     declarations: [
         LayoutDesignerComponent,
-        HTMLDialog
+        HTMLDialog,
+        CSSDialog,
+        CSSGlobalDialog
     ],
     exports: [
         LayoutDesignerComponent,
         LayoutDesignerMenuModule,
-        HTMLDialog
+        HTMLDialog,
+        CSSDialog,
+        CSSGlobalDialog
     ]
 })
 

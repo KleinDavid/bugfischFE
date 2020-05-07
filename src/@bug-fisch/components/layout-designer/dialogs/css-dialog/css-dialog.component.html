@@ -1,0 +1,23 @@
+<div id="workflow-bpmn-modeler-dialog">
+    <div class="modeler-content">
+        <mat-form-field style="width: 100%">
+            <mat-label>ClassName</mat-label>
+            <input type="text" autocomplete="off" matInput [(ngModel)]="cssClass.name" placeholder="ClassName">
+        </mat-form-field>
+        <mat-form-field style="width: 100%">
+            <mat-label>Values</mat-label>
+            <textarea [(ngModel)]="cssClass.valueString" type="text" autocomplete="off" matInput
+                placeholder="Values"></textarea>
+        </mat-form-field>
+        <div fxLayout="row">
+            <div fxFlex="100" style="display: flex;">
+                <div style="margin-left: auto; margin-right: 12px">
+                    <button mat-raised-button color="primary" (click)="save()">Speicher</button>
+                </div>
+                <div>
+                    <a mat-raised-button target="_blank" (click)="close()">Abbrechen</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

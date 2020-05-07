@@ -12,6 +12,7 @@ import { TextField } from './layout-designer-objects/RenderableObjects/Transform
 import { RenderableObject } from './layout-designer-objects/RenderableObject';
 import { HTMLDialog } from './html-dialog/html-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
+import { CssClass } from './layout-designer-objects/CssClass';
 
 @Component({
   selector: 'atled-layout-designer',
@@ -25,12 +26,12 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
   @HostListener('window:click', ['$event'])
   mouseClickEvent(event: MouseEvent) {
-    this.mouseClickEventHandle(event);
+    !this.disableAll ? this.mouseClickEventHandle(event) : '';
   }
 
   @HostListener('window:keyup', ['$event'])
   keyupEvent(event: KeyboardEvent) {
-    this.keyupEventHandle(event);
+    !this.disableAll ? this.keyupEventHandle(event) : '';
   }
 
   @HostListener('window:drag', ['$event'])
@@ -39,29 +40,30 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
   @HostListener('window:mousedown', ['$event'])
   mouseDownEvent(event: MouseEvent) {
-    this.mouseDownEventHandle(event);
+    !this.disableAll ? this.mouseDownEventHandle(event) : '';
   }
 
   @HostListener('window:mouseup', ['$event'])
   mouseUpEvent(event: MouseEvent) {
-    this.mouseClickEvent(event);
+    !this.disableAll ? this.mouseClickEvent(event) : '';
   }
 
   @HostListener('window:mousemove', ['$event'])
   mouseMoveEvent(event: MouseEvent) {
-    this.mouseMoveEventHandle(event);
+    !this.disableAll ? this.mouseMoveEventHandle(event) : '';
   }
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any) {
-    this.initializeIdCard();
+    !this.disableAll ? this.initializeIdCard() : '';
   }
 
   mouseIsDown: boolean = false;
   mouseDownPosition: Position;
   droped: boolean = false;
   lastMousePosition: Position = new Position(0, 0)
-  listOfTransformableObjects: TransformableObject[] = []
+  listOfTransformableObjects: TransformableObject[] = [];
+  disableAll = false;
 
   selectedObject: TransformableObject;
   copyedObject: TransformableObject;
@@ -75,6 +77,8 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
   maxZoomFactor = 500;
   zoomStep = 10;
 
+  idCardDirection = 0;
+
   defaultRect: Rect;
   defaultCircle: Circle;
   defaultTextField: TextField;
@@ -82,12 +86,15 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
   currentDefaultObject: TransformableObject;
 
+  globalCssClasses: CssClass[] = [];
+
   constructor(private htmlDialog: MatDialog) {
   }
 
   ngOnInit(): void {
     this.editField = new EditField();
     this.idCard = new IdCard('idCard');
+    this.idCard.create();
 
     this.defaultRect = new Rect('');
     this.defaultCircle = new Circle('');
@@ -96,7 +103,7 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
     this.defaultRect.editableProperties = ['borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'backgroundColor'];
     this.defaultCircle.editableProperties = ['borderWidth', 'borderColor', 'backgroundColor']
-    this.defaultTextField.editableProperties = ['fontStyle', 'fontVariant', 'fontWeight', 'fontSize', 'fontFamily', 'textAlign', 'verticalAlign'];
+    this.defaultTextField.editableProperties = ['fontSize', 'lineHeight', 'fontFamily', 'verticalAlign', 'fontVariant'];
     this.defaultEditableImage.editableProperties = ['borderColor', 'borderWidth', 'borderStyle', 'borderRadius', 'backgroundColor'];
   }
 
@@ -108,16 +115,24 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
   initializeIdCard(): void {
 
     let outerStyle = document.getElementById('layout-desinger-space-around').getBoundingClientRect();
-    this.idCard.height = 540 / 2.2;
-    this.idCard.width = 856 / 2.2;
-    this.idCard.position.x = outerStyle.width / 2 - this.idCard.width / 2 + outerStyle.x;
-    this.idCard.position.y = outerStyle.height / 2 - this.idCard.height / 2 + outerStyle.y;
 
     this.editField.position.x = outerStyle.x;
     this.editField.position.y = outerStyle.y;
     this.editField.height = outerStyle.height;
     this.editField.width = outerStyle.width;
-    this.idCard.create();
+
+    if (this.idCardDirection === 0) {
+      this.idCard.height = 540 / 2.2;
+      this.idCard.width = 856 / 2.2;
+      this.idCard.position.x = outerStyle.width / 2 - this.idCard.width / 2 + outerStyle.x - this.editField.position.x;
+      this.idCard.position.y = outerStyle.height / 2 - this.idCard.height / 2 + outerStyle.y - this.editField.position.y;
+    } else {
+      this.idCard.width = 540 / 2.2;
+      this.idCard.height = 856 / 2.2;
+      this.idCard.position.x = outerStyle.width / 2 - this.idCard.width / 2 + outerStyle.x - this.editField.position.x;
+      this.idCard.position.y = outerStyle.height / 2 - this.idCard.height / 2 + outerStyle.y - this.editField.position.y;
+    }
+    this.idCard.render();
 
     this.render()
   }
@@ -245,20 +260,21 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
   private addObjectToView(object: TransformableObject, select: boolean = false): void {
     object.id = this.getNewObjectId();
+    object.setParent(this.idCard);
     select ? object.select() : object.unselect();
-    object.editEnd();
-
+    
+    object.create();
+    object.editEnd();  
+    
     // ?
     object.getAllChildren().forEach(c => { this.addObjectToView(c); })
     this.idCard.addChild(object, true);
 
-    object.getObservable().subscribe(() => { this.render(); });
     this.listOfTransformableObjects.push(object);
 
     select && this.selectedObject ? this.selectedObject.unselect() : '';
     this.selectedObject = select ? object : this.selectedObject;
-
-    this.render();
+    object.render();
   }
 
   private copySelectedObject(): TransformableObject {
@@ -286,7 +302,6 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
   }
 
   createObject(position: Position, imageSrc?: string): void {
-    console.log('selsc', this.selectedObject)
     position = new Position(position.x + this.editField.scrollX - this.editField.position.x, position.y + this.editField.scrollY - this.editField.position.y);
 
     let id = this.getNewObjectId();
@@ -303,6 +318,7 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
         break;
       case LayoutDesignerlCreationMode.Image:
         this.selectedObject = new EditableImage(id, imageSrc, this.idCard);
+        position = new Position(this.idCard.position.x, this.idCard.position.y);
         break;
       case LayoutDesignerlCreationMode.Circle:
         this.selectedObject = new Circle(id);
@@ -357,26 +373,25 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
     }
     if (mode === LayoutDesignerlCreationMode.Rect) {
       this.currentDefaultObject = this.defaultRect;
+      
     }
     if (mode === LayoutDesignerlCreationMode.Circle) {
       this.currentDefaultObject = this.defaultCircle;
     }
     if (mode === LayoutDesignerlCreationMode.None) {
-      this.currentDefaultObject = null;
+      this.currentDefaultObject = this.idCard;
     }
     this.selectedObject =
       (this.selectedObject !== this.defaultTextField
         && this.selectedObject !== this.defaultRect
         && this.selectedObject !== this.defaultEditableImage
         && this.selectedObject !== this.defaultCircle
+        && this.selectedObject !== this.idCard
         && this.selectedObject)
         ? this.selectedObject
         : this.currentDefaultObject;
-
     this.currentCreationMode = mode;
   }
-
-
 
   menuRightChanged(): void {
     this.selectedObject.transform(new Position(0, 0));
@@ -398,6 +413,7 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
 
   private handleReaderLoaded(e: any): void {
     let reader = e.target;
+    console.log(reader);
     this.createObject(new Position(this.idCard.position.x, this.idCard.position.y), reader.result)
   }
 
@@ -453,6 +469,20 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
       }
     });
     return id;
+  }
+
+  cardDirectionChange() {
+    this.idCardDirection = this.idCardDirection === 0 ? 1 : 0;
+    this.initializeIdCard();
+  }
+
+  visibleChange(visible: boolean) {
+    this.idCard.overflow = visible ? 'visible' : 'hidden';
+    this.idCard.render();
+  }
+
+  disableLayoutDesinger(event: boolean){
+    this.disableAll = event;
   }
 }
 

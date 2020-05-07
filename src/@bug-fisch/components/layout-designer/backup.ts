@@ -813,7 +813,6 @@ class SelectionWrapper extends TransformableObject {
   }
 
   render(): string {
-    console.log(this.borderIndexX);
     this.width -= (1 + this.borderIndexX);
     this.height -= (1 + this.borderIndexY);
     let returnValue = super.render();

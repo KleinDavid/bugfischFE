@@ -1,7 +1,11 @@
 <input id="imageUploader" display="none" hidden type="file" accept="image/*" (change)="handleInputChange($event)" />
 <div id="atled-layout-designer">
     <div fxLayout="row wrap">
-        <atled-layout-designer-menu-top fxFlex="100" (onChange)="menuTopChanged()">
+        <atled-layout-designer-menu-top fxFlex="100" (onChange)="menuTopChanged()"
+            (cardDirectionChange)="cardDirectionChange()" (visibleChange)="visibleChange($event)"
+            [globalCssClasses]="globalCssClasses" [transformableObjects]="listOfTransformableObjects"
+            [idCard]="idCard" [defaultTextField]="defaultTextField" [selectedObject]="selectedObject"
+            (disableLayoutDesinger)="disableLayoutDesinger($event)">
         </atled-layout-designer-menu-top>
     </div>
     <div fxLayout="row wrap" class="full-height-flex">
@@ -10,19 +14,23 @@
                 (onCreationModeChanged)="changeCreationMode($event)">
             </atled-layout-designer-menu-left>
         </div>
-        <div fxFlex draggable="false" id="layout-desinger-space-around" class="layout-desinger" (scroll)="onScrollEditField($event)" ondragstart="return false;" ondrop="return false;">
+        <div fxFlex draggable="false" id="layout-desinger-space-around" class="layout-desinger"
+            (scroll)="onScrollEditField($event)" ondragstart="return false;" ondrop="return false;">
             <div class="zoom-elements">
-                <div class="zoom-element zoom-element-top" style="border-bottom: 1px solid black;" (click)="zoomIn()">+</div>
+                <div class="zoom-element zoom-element-top" style="border-bottom: 1px solid black;" (click)="zoomIn()">+
+                </div>
                 <div class="zoom-element zoom-element-bootom" (click)="zoomOut()">-</div>
             </div>
             <!--<div id="atled-layout-designer-chipcard"></div>-->
             <div id="cardBoundary" class="cardBoundary" #cardBoundary>
-            <!--<div class="noDragElement"></div>-->
+                <!--<div class="noDragElement"></div>-->
             </div>
         </div>
         <div fxFlex="360px">
-            <atled-layout-designer-menu-right (change)="menuRightChanged()" [selectedObject]="selectedObject"
-                [currentCreationMode]="currentCreationMode">
+            <atled-layout-designer-menu-right (change)="menuRightChanged()"
+                (disableLayoutDesinger)="disableLayoutDesinger($event)" [cssMode]="true"
+                [selectedObject]="selectedObject" [currentCreationMode]="currentCreationMode" [disableAll]="disableAll"
+                [globalCssClasses]="globalCssClasses">
             </atled-layout-designer-menu-right>
         </div>
     </div>

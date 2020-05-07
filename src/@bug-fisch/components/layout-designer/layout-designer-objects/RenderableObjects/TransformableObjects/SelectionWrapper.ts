@@ -1,6 +1,5 @@
 import { TransformableObject } from "../TransformableObject";
 import { LayoutDesignerlEditMode } from '../../Enums';
-import { EditField } from '../EditField';
 import { TransformRect } from '../TransformRect';
 import { Position } from '../../Position';
 import { Rect } from './Rect';
@@ -9,19 +8,22 @@ import { TextField } from './TextField';
 import { Circle } from './Circle';
 
 export class SelectionWrapper extends TransformableObject {
-  icon: string;
+  icon: string = 'view_quilt';
   type = 'SelectionWrapper'
 
   borderWidth = 1;
-  borderStyle = 'dashed';
+  borderStyle = 'dashed';  
+  zIndex = 1000;
+
   typeName = 'Auswahl';
   allTransformableObjects: TransformableObject[] = [];
   selectedObjects: TransformableObject[] = [];
   editableProperties = [];
   borderIndexX = 0;
   borderIndexY = 0;
-
   isSelecting = true;
+
+  halfStyleProperties: string[] = ['position.x', 'position.y', 'width', 'height'];
 
   constructor(id: string, allTransformableObjects: TransformableObject[]) {
     super(id);
@@ -301,7 +303,7 @@ export class SelectionWrapper extends TransformableObject {
   getCopy(): SelectionWrapper {
     let copyedObject: SelectionWrapper = new SelectionWrapper('', this.allTransformableObjects);
     for (let key in this) {
-      if (key !== 'changedSubject' && key !== 'positionAndSizeChanceSubject' && key !== 'allTransformableObjects' && key !== 'selectedObjects') {
+      if (key !== 'changedSubject' && key !== 'positionAndSizeChanceSubject' && key !== 'allTransformableObjects' && key !== 'transformRects' && key !== 'parent' && key !== 'selectedObjects') {
         copyedObject[key + ''] = JSON.parse(JSON.stringify(this[key]));
       }
 
@@ -331,9 +333,10 @@ export class SelectionWrapper extends TransformableObject {
 
           childList.push(copy);
         }
-        copyedObject['selectedObjects'] = childList;
+        copyedObject['selectedObjects'] = childList; 
       }
     }
+    copyedObject.transformRects = [];
     return copyedObject;
   }
 

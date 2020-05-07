@@ -1,6 +1,9 @@
 import { Component, Output, EventEmitter, OnInit, Input } from '@angular/core';
 import { LayoutDesignerlCreationMode, LayoutDesignerImagePosition } from '../../layout-designer-objects/Enums'; import { TransformableObject } from '../../layout-designer-objects/RenderableObjects/TransformableObject';
 import { Transformation } from '../../layout-designer-objects/Transformation';
+import { CssClass } from '../../layout-designer-objects/CssClass';
+import { MatDialog } from '@angular/material/dialog';
+import { CSSDialog } from '../../dialogs/css-dialog/css-dialog.component';
 ;
 
 
@@ -13,15 +16,25 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
 
   @Input() currentCreationMode: LayoutDesignerlCreationMode = LayoutDesignerlCreationMode.None;
   @Input() selectedObject: TransformableObject;
+  @Input() cssMode: boolean = false;
+  @Input() disableAll: boolean = false;
+  @Input() globalCssClasses: CssClass[] = [];
 
   @Output() change: EventEmitter<any> = new EventEmitter();
+  @Output() disableLayoutDesinger: EventEmitter<boolean> = new EventEmitter();
 
   colors: any = {};
   creationModes = LayoutDesignerlCreationMode;
   imagePositions = LayoutDesignerImagePosition;
-  selectDataLists = {}
+  selectDataLists = {};
+  selectedClass = new CssClass();
 
-  constructor() {
+  constructor(private cssDialog: MatDialog) {
+    let testClass = new CssClass();
+    testClass.name = 'borderLeft';
+    testClass.valueString = 'border-left: 1px solid black';
+    this.globalCssClasses.push(testClass);
+    testClass.create();
   }
 
   ngOnInit(): void {
@@ -111,6 +124,9 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
   }
 
   getColorPickerWidth(): string {
+    if (document.getElementsByClassName('$valueInput').length === 0) {
+      return '0';
+    }
     return (document.getElementsByClassName('$valueInput')[0].getBoundingClientRect().width - 1) + '';
   }
 
@@ -134,6 +150,11 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
   }
 
   colorChanged(valueName: string, event: string): void {
+    if(valueName in this.colors){
+      if(this.colors[valueName] !== event){
+        this.setValue(valueName, event);
+      }
+    }
     this.colors[valueName] = event;
   }
 
@@ -149,5 +170,65 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
   getMinValue(valueName: string): number {
     if (['position.x', 'position.y'].includes(valueName)) { return Number.MIN_SAFE_INTEGER; }
     return 0;
+  }
+
+  addCssClass(value: CssClass) {
+    if (!this.selectedObject.cssClassList.includes(value)) {
+      this.selectedObject.addClass(value);
+    }
+    this.selectedClass = null;
+  }
+
+  removeCssClass(cssClass: CssClass): void {
+    this.selectedObject.removeCssClass(cssClass);
+  }
+
+  editCssClass(cssClass: CssClass) {
+    this.disableAll = true;
+    this.disableLayoutDesinger.emit(true);
+    const dialogRef = this.cssDialog.open(CSSDialog, {
+      panelClass: 'dialog',
+      autoFocus: false,
+      data: { cssClass: cssClass }
+    });
+
+    dialogRef.afterClosed().subscribe((res: any) => {
+      this.disableLayoutDesinger.emit(false);
+      let cssClassNew = res.data.cssClass as CssClass;
+      cssClass.name = cssClassNew.name;
+      cssClass.valueString = cssClassNew.valueString;
+      cssClass.create();
+      this.selectedObject.updateClasses();
+    });
+  }
+
+  addNewClass() {
+    let cssClass = new CssClass();
+    this.disableAll = true;
+    this.disableLayoutDesinger.emit(true);
+    const dialogRef = this.cssDialog.open(CSSDialog, {
+      panelClass: 'dialog',
+      autoFocus: false,
+      data: { cssClass: cssClass }
+    });
+
+    dialogRef.afterClosed().subscribe((res: any) => {
+      this.disableLayoutDesinger.emit(false);
+      let cssClassNew = res.data.cssClass as CssClass;
+      cssClass.name = cssClassNew.name;
+      cssClass.valueString = cssClassNew.valueString;
+      if (cssClassNew.name !== '') {
+        this.selectedObject.addClass(cssClass);
+        this.globalCssClasses.push(cssClass);
+        cssClass.create();
+      }
+    });
+  }
+
+  getHalfPropertyClass(valueName: string): string {
+    if (!this.selectedObject.halfStyleProperties.includes(valueName)) {
+      return '';
+    }
+    return this.selectedObject.halfStyleProperties.indexOf(valueName) % 2 === 0 ? 'padding-right' : 'padding-left';
   }
 }

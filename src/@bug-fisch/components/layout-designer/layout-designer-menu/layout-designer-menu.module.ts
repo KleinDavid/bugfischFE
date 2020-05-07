@@ -19,6 +19,7 @@ import { MatRadioModule } from '@angular/material/radio'
 import { MatSelectModule } from '@angular/material/select';
 import { MatOptionModule, MatNativeDateModule } from '@angular/material/core';
 import { FormsModule } from '@angular/forms';
+import { MatTabsModule } from '@angular/material/tabs';
 
 @NgModule({
     imports: [
@@ -37,6 +38,7 @@ import { FormsModule } from '@angular/forms';
         MatNativeDateModule,
         FormsModule,
         MatSelectModule,
+        MatTabsModule,
 
         MatFormFieldModule,
         BugFischSharedModule,
