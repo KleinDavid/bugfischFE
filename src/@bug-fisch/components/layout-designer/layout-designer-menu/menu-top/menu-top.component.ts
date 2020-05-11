@@ -30,7 +30,7 @@ export class LayoutDesignerMenuTopComponent implements OnInit {
 
   styleSheet: HTMLStyleElement;
   fontFileName: string;
-  fonts: string[] = [];
+  fonts: string[] = [''];
 
   constructor(private dialogRef: MatDialog, ) {
   }
@@ -101,89 +101,48 @@ export class LayoutDesignerMenuTopComponent implements OnInit {
     });
   }
 
-  onBoldClick(): void {
+  onTextStyleButtonClick(valueName: string, valueActiv: string, valueAlternativ: string): void {
     if (this.selectedObject?.type === 'TextField') {
-      this.selectedObject['fontWeight'] = (this.selectedObject['fontWeight'] === 'bold') ? 'normal' : 'bold';
-      this.selectedObject.render();
+      this.selectedObject.getCssValue(valueName).value === valueActiv ?
+        this.selectedObject.setCssValue(valueName, valueAlternativ) :
+        this.selectedObject.setCssValue(valueName, valueActiv);
     } else {
-      this.defaultTextField['fontWeight'] = (this.defaultTextField['fontWeight'] === 'bold') ? 'normal' : 'bold';
-    }
-  }
-
-  onItalicClick(): void {
-    if (this.selectedObject?.type === 'TextField') {
-      this.selectedObject['fontStyle'] = (this.selectedObject['fontStyle'] === 'italic') ? 'normal' : 'italic';
-      this.selectedObject.render();
-    } else {
-      this.defaultTextField['fontStyle'] = (this.defaultTextField['fontStyle'] === 'italic') ? 'normal' : 'italic';
-    }
-  }
-
-  onUnderlinedClick(): void {
-    if (this.selectedObject?.type === 'TextField') {
-      this.selectedObject['textDecoration'] = (this.selectedObject['textDecoration'] === 'underline') ? 'none' : 'underline';
-      this.selectedObject.render();
-    } else {
-      this.defaultTextField['textDecoration'] = (this.defaultTextField['textDecoration'] === 'underline') ? 'none' : 'underline';
+      (this.defaultTextField.getCssValue(valueName).value === valueActiv) ?
+        this.defaultTextField.setCssValue(valueName, valueAlternativ) :
+        this.defaultTextField.setCssValue(valueName, valueActiv);
     }
   }
 
   onAlignButtonClick(align: string): void {
     if (this.selectedObject?.type === 'TextField') {
-      this.selectedObject['textAlign'] = align;
-      this.selectedObject.render();
+      this.selectedObject.setCssValue('text-align', align);
     } else {
-      this.defaultTextField['textAlign'] = align;
+      this.defaultTextField.setCssValue('text-align', align);
     }
   }
 
   onFontFamilyChange(fontName: string): void {
     if (this.selectedObject?.type === 'TextField') {
-      this.selectedObject['fontFamily'] = fontName;
+      this.selectedObject.setCssValue('font-family', fontName);
       this.selectedObject.render();
     } else {
-      this.defaultTextField['fontFamily'] = fontName;;
+      this.defaultTextField.setCssValue('font-family', fontName);;
     }
   }
 
-  isBold(): boolean {
+  isCssValueSet(valueName: string, value: string): boolean {
     if (this.selectedObject?.type === 'TextField') {
-      return this.selectedObject['fontWeight'] === 'bold';
+      return this.selectedObject.getCssValue(valueName).value === value;
     } else {
-      return this.defaultTextField['fontWeight'] === 'bold';
+      return this.defaultTextField.getCssValue(valueName).value === value;
     }
   }
 
-  isItalic(): boolean {
+  getSelectedFont(): string {
     if (this.selectedObject?.type === 'TextField') {
-      return this.selectedObject['fontStyle'] === 'italic';
+      return this.selectedObject.getCssValue('font-family').value;
     } else {
-      return this.defaultTextField['fontStyle'] === 'italic';
-    }
-  }
-
-  isUnderlined(): boolean {
-    if (this.selectedObject?.type === 'TextField') {
-      return this.selectedObject['textDecoration'] === 'underline';
-    } else {
-      return this.defaultTextField['textDecoration'] === 'underline';
-    }
-  }
-
-  isAlign(align: string): boolean {
-    if (this.selectedObject?.type === 'TextField') {
-      return this.selectedObject['textAlign'] === align;
-    } else {
-      return this.defaultTextField['textAlign'] === align;
-    }
-  }
-
-  getFont(){
-    if (this.selectedObject?.type === 'TextField') {
-      console.log(this.selectedObject['fontFamily']);
-      return this.selectedObject['fontFamily'];
-    } else {
-      return this.defaultTextField['fontFamily'];
+      return this.defaultTextField.getCssValue('font-family').value;
     }
   }
 

@@ -11,7 +11,7 @@
             <div class="menu-properties menu-right-inner" fxFlex>
                 <ng-container>
                     <div fxLayout="column" style="padding-bottom: 12px; padding-top: 6px">
-                        <div *ngIf="getValue('typeName') == 'Bild'" style="padding-bottom: 12px; margin-top: -3px">
+                        <div *ngIf="selectedObject?.type === 'EditableImage'" style="padding-bottom: 12px; margin-top: -3px">
                             <mat-radio-group (change)="setValue('imagePosition', $event.value)"
                                 [value]="getValue('imagePosition')" aria-label="Select an option">
                                 <div fxLayout="column">
@@ -33,104 +33,73 @@
                             </mat-radio-group>
                         </div>
                         <div fxLayout="row wrap">
-                            <div *ngFor="let valueName of getEditableValuesOfSelectedObject(); let odd=odd; let even=even;"
-                                [fxFlex]="selectedObject.halfStyleProperties.includes(valueName) ? '50':'100'"
-                                class="$valueInput"
-                                [ngClass]="getHalfPropertyClass(valueName)">
+                            <div *ngFor="let value of getEditableValuesOfSelectedObject(); let odd=odd; let even=even;"
+                                [fxFlex]="value.smallEditField ? '50':'100'" class="$valueInput"
+                                [ngClass]="getHalfPropertyClass(value.valueName)">
 
-                                <ng-container
-                                    *ngIf="!(valueName == 'backgroundColor' || valueName == 'borderColor') && getValueType(valueName) == 'number'">
-
-                                    <ng-container *ngIf="(valueName == 'position.x')">
-                                        <mat-form-field style="width: 100%">
-                                            <mat-label>left</mat-label>
-                                            <input type="number" [min]="getMinValue(valueName)"
-                                                [max]="getMaxValue(valueName)" autocomplete="off" matInput
-                                                placeholder="top" (input)="setInput()" [value]="getValue(valueName)"
-                                                (focusout)="setValue(valueName, $event.target.value)"
-                                                (keyup)="checkEnterPress($event.code, valueName, $event.target.value)">
-                                        </mat-form-field>
-                                    </ng-container>
-                                    <ng-container *ngIf="(valueName == 'position.y')">
-                                        <mat-form-field style="width: 100%">
-                                            <mat-label>top</mat-label>
-                                            <input type="number" [min]="getMinValue(valueName)"
-                                                [max]="getMaxValue(valueName)" autocomplete="off" matInput
-                                                placeholder="left" (input)="setInput()" [value]="getValue(valueName)"
-                                                (focusout)="setValue(valueName, $event.target.value)"
-                                                (keyup)="checkEnterPress($event.code, valueName, $event.target.value)">
-                                        </mat-form-field>
-                                    </ng-container>
-                                    <ng-container *ngIf="!(valueName == 'position.y' || valueName == 'position.x')">
-                                        <mat-form-field style="width: 100%">
-                                            <mat-label>{{valueName}}</mat-label>
-                                            <input type="number" [min]="getMinValue(valueName)"
-                                                [max]="getMaxValue(valueName)" autocomplete="off" matInput
-                                                [placeholder]="valueName" (input)="setInput()"
-                                                [value]="getValue(valueName)"
-                                                (focusout)="setValue(valueName, $event.target.value)"
-                                                (keyup)="checkEnterPress($event.code, valueName, $event.target.value)">
-                                        </mat-form-field>
-                                    </ng-container>
-
-                                </ng-container>
-                                <ng-container
-                                    *ngIf="!(valueName == 'backgroundColor' || valueName == 'borderColor') && getValueType(valueName) == 'string'">
+                                <ng-container *ngIf="value.valueType === CssValueType.NUMBER">
                                     <mat-form-field style="width: 100%">
-                                        <mat-label>{{valueName}}</mat-label>
-                                        <input autocomplete="off" matInput [placeholder]="valueName"
-                                            (input)="setInput()" [value]="getValue(valueName)"
-                                            (focusout)="setValue(valueName, $event.target.value)"
-                                            (keyup)="checkEnterPress($event.code, valueName, $event.target.value)">
+                                        <mat-label>{{value.valueName}}</mat-label>
+                                        <input type="number" [min]="value.minValue" [max]="value.maxValue"
+                                            autocomplete="off" matInput [placeholder]="value.valueName"
+                                             [value]="value.value"
+                                            (focusout)="setValue(value.valueName, $event.target.value)"
+                                            (keyup)="checkEnterPress($event.code, value.valueName, $event.target.value)">
                                     </mat-form-field>
                                 </ng-container>
-                                <ng-container *ngIf="(valueName == 'backgroundColor' || valueName == 'borderColor')">
+                                <ng-container *ngIf="value.valueType === CssValueType.STRING">
+                                    <mat-form-field style="width: 100%">
+                                        <mat-label>{{value.valueName}}</mat-label>
+                                        <input autocomplete="off" matInput [placeholder]="value.valueName"
+                                             [value]="value.value"
+                                            (focusout)="setValue(value.valueName, $event.target.value)"
+                                            (keyup)="checkEnterPress($event.code, value.valueName, $event.target.value)">
+                                    </mat-form-field>
+                                </ng-container>
+                                <ng-container *ngIf="value.valueType === CssValueType.COLOR">
                                     <div fxLayout="row">
-                                        <div fxFlex><!--(colorPickerClose)="setValue(valueName, colors[valueName])"-->
+                                        <div fxFlex>
+                                            <!--(colorPickerClose)="setValue(valueName, colors[valueName])"-->
                                             <mat-form-field style="width: 100%">
-                                                <mat-label>{{valueName}}</mat-label>
-                                                <input matInput [colorPicker]="getPropertyByValueName(valueName)"
+                                                <mat-label>{{value.valueName}}</mat-label>
+                                                <input matInput [colorPicker]="value.value"
                                                     [cpDisableInput]="false" [cpAlphaChannel]="'disabled'"
                                                     [cpOutputFormat]="'hex'" [cpFallbackColor]="'#111111'"
-                                                    [cpPosition]="'bottom'" [cpDialogDisplay]=""
-                                                    [cpWidth]="'294px'"
+                                                    [cpPosition]="'bottom'" [cpDialogDisplay]="" [cpWidth]="'294px'"
                                                     [cpCloseClickOutside]="true" [cpSaveClickOutside]="true"
-                                                    [value]="getValue(valueName)"
-                                                    
-                                                    (colorPickerChange)="colorChanged(valueName, $event)"
-                                                    (keyup)="checkEnterPress($event.code, valueName, $event.target.value)" />
+                                                    [value]="value.value"
+                                                    (colorPickerChange)=" colorChanged(value.valueName, $event)"
+                                                    (keyup)="checkEnterPress($event.code, value.valueName, $event.target.value)" />
                                             </mat-form-field>
                                         </div>
                                         <div fxFlex="20px">
-                                            <div [style.backgroundColor]="getValue(valueName)"
+                                            <div [style.backgroundColor]="value.value"
                                                 style="width: 100%; height: 38px; margin-top: -8px"></div>
                                         </div>
                                     </div>
                                 </ng-container>
-                                <ng-container *ngIf="getValueType(valueName) == 'list'">
+                                <ng-container *ngIf="value.valueType === CssValueType.SELECT">
                                     <mat-form-field style="width: 100%">
-                                        <mat-label>{{valueName}}</mat-label>
-                                        <mat-select (selectionChange)="setValue(valueName, $event.value)"
-                                            [(value)]="selectedObject[valueName]">
-                                            <mat-option *ngFor="let data of selectedObject[valueName + 'Properties']"
-                                                [value]="data">
+                                        <mat-label>{{value.valueName}}</mat-label>
+                                        <mat-select (selectionChange)="setValue(value.valueName, $event.value)"
+                                            [(value)]="value.value">
+                                            <mat-option *ngFor="let data of value.selectProperties" [value]="data">
                                                 {{data}}
                                             </mat-option>
                                         </mat-select>
                                     </mat-form-field>
                                 </ng-container>
-                                <ng-container *ngIf="getValueType(valueName) == 'listAndWrite'">
+                                <ng-container *ngIf="value.valueType === CssValueType.STRING_AND_SELECT">
                                     <div class="inputAndSelect">
                                         <mat-form-field style="width: 100%">
-                                            <mat-label>{{valueName}}</mat-label>
-                                            <input type="text" autocomplete="off" matInput [placeholder]="valueName"
-                                                (input)="setInput()" [value]="getValue(valueName)"
-                                                (focusout)="setValue(valueName, $event.target.value)"
-                                                (keyup)="checkEnterPress($event.code, valueName, $event.target.value)">
-                                            <mat-select (selectionChange)="setValue(valueName, $event.value)">
-                                                <mat-option
-                                                    *ngFor="let data of selectedObject[valueName + 'PropertiesNotFixed']"
-                                                    [value]="data">
+                                            <mat-label>{{value.valueName}}</mat-label>
+                                            <input type="text" autocomplete="off" matInput
+                                                [placeholder]="value.valueName"
+                                                [value]="value.value"
+                                                (focusout)="setValue(value.valueName, $event.target.value)"
+                                                (keyup)="checkEnterPress($event.code, value.valueName, $event.target.value)">
+                                            <mat-select (selectionChange)="setValue(value.valueName, $event.value)">
+                                                <mat-option *ngFor="let data of value.selectProperties" [value]="data">
                                                     {{data}}
                                                 </mat-option>
                                             </mat-select>
@@ -139,7 +108,6 @@
                                 </ng-container>
                             </div>
                         </div>
-
                     </div>
                 </ng-container>
             </div>
@@ -163,9 +131,8 @@
                             </div>
                         </div>
                         <div fxFlex fxLayout="column" class="class-list">
-                            <div *ngFor="let class of selectedObject.cssClassList"
-                                class="global-class-cell vertical-center-box" (click)="editCssClass(class)"
-                                fxFlex="36px">
+                            <div *ngFor="let class of getActiveClasses()" class="global-class-cell vertical-center-box"
+                                (click)="editCssClass(class)" fxFlex="36px">
                                 <div class="vertical-center">
                                     <div fxLayout="row" class="full-width">
                                         <div fxFlex>
@@ -183,18 +150,26 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- <div *ngFor="let class of selectedObject.cssClassList" fxFlex fxLayout="row">
-                    <div fxFlex>{{class.name}}</div>
-                    <div fxFlex="24px">
-                        <mat-icon class="menu-right-title-icon click-icon" (click)="editCssClass(class)">edit</mat-icon>
-                    </div>
-                    <div fxFlex="24px">
-                        <mat-icon class="menu-right-title-icon click-icon" (click)="removeCssClass(class)">close
-                        </mat-icon>
-                    </div>
-                </div>-->
                     </div>
                 </ng-container>
+            </div>
+        </mat-tab>
+        <mat-tab label="Src" *ngIf="selectedObject?.type === 'EditableImage'">
+            <div class="menu-properties menu-right-inner" fxFlex>
+                <div class="inputAndSelect">
+                    <!--<mat-form-field style="width: 100%">
+                        <mat-label>Src</mat-label>
+                        <input type="text" autocomplete="off" matInput placeholder="Src"
+                            (input)="setInput()" [value]="value.value"
+                            (focusout)="setValue(value.valueName, $event.target.value)"
+                            (keyup)="checkEnterPress($event.code, value.valueName, $event.target.value)">
+                        <mat-select (selectionChange)="setValue(value.valueName, $event.value)">
+                            <mat-option *ngFor="let data of value.selectProperties" [value]="data">
+                                {{data}}
+                            </mat-option>
+                        </mat-select>
+                    </mat-form-field>-->
+                </div>
             </div>
         </mat-tab>
     </mat-tab-group>

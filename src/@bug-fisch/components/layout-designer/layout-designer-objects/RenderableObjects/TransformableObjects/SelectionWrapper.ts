@@ -12,7 +12,7 @@ export class SelectionWrapper extends TransformableObject {
   type = 'SelectionWrapper'
 
   borderWidth = 1;
-  borderStyle = 'dashed';  
+  borderStyle = 'dashed';
   zIndex = 1000;
 
   typeName = 'Auswahl';
@@ -57,15 +57,17 @@ export class SelectionWrapper extends TransformableObject {
   }
 
   render(): void {
-    this.width -= (1 + this.borderIndexX);
-    this.height -= (1 + this.borderIndexY);
-    
+    this.width -= (2 + this.borderIndexX);
+    this.height -= (2 + this.borderIndexY);
+    // this.position.x -= 1;
+    // this.position.y -= 1;
+
     this.htmlElementRef.style.position = 'absolute';
 
-    this.htmlElementRef.style.height = this.height + 'px';
-    this.htmlElementRef.style.width = this.width + 'px';
-    this.htmlElementRef.style.top = this.position.y + 'px';
-    this.htmlElementRef.style.left = this.position.x + 'px';
+    this.htmlElementRef.style.height = (this.height | 0) + 'px';
+    this.htmlElementRef.style.width = (this.width | 0) + 'px';
+    this.htmlElementRef.style.top = (this.position.y | 0) + 'px';
+    this.htmlElementRef.style.left = (this.position.x | 0) + 'px';
     this.htmlElementRef.style.zIndex = this.zIndex + '';
 
     this.htmlElementRef.style.borderRadius = this.borderRadius + 'px';
@@ -73,9 +75,11 @@ export class SelectionWrapper extends TransformableObject {
     this.htmlElementRef.style.backgroundColor = this.backgroundColor;
     this.htmlElementRef.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
     this.htmlElementRef.id = this.id;
-    
-    this.width += (1 + this.borderIndexX);
-    this.height += (1 + this.borderIndexY);
+
+    this.width += (2 + this.borderIndexX);
+    this.height += (2 + this.borderIndexY);
+    // this.position.x += 1;
+    // this.position.y += 1;
   }
 
   delete(): void {
@@ -333,7 +337,7 @@ export class SelectionWrapper extends TransformableObject {
 
           childList.push(copy);
         }
-        copyedObject['selectedObjects'] = childList; 
+        copyedObject['selectedObjects'] = childList;
       }
     }
     copyedObject.transformRects = [];

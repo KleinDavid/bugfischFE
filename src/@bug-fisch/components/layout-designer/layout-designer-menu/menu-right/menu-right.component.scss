@@ -112,6 +112,10 @@
     padding-bottom: 15px;
   }
 
+  ::ng-deep .mat-tab-body-content {
+    width: 100%;
+  }
+
   ::ng-deep
     .mat-form-field-appearance-outline.mat-form-field-can-float.mat-form-field-should-float
     .mat-form-field-label {

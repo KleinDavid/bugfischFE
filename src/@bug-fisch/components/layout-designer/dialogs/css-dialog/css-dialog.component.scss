@@ -1,8 +1,53 @@
 .dialog .mat-dialog-container {
-
-  width: 500px !important;
+  min-width: 500px !important;
   height: auto;
   overflow: hidden;
+
+  .modeler-content-left {
+    width: 500px;
+  }
+
+  .modeler-content-right {
+    width: 250px;
+    padding-left: 12px;
+
+    .binding-form-field{
+      margin-top: 11px;
+      max-width: 100px;
+    }
+
+    .vertical-center-box {
+      position: relative;
+
+      .vertical-center {
+        left: 50%;
+        width: 100%;
+        position: absolute;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    .global-class-cell {
+      padding-left: 12px;
+      border-bottom: 1px solid #c9c9c9;
+    }
+
+    .table {
+      display: table;
+      height: 100%;
+
+      .table-cell {
+        display: table-cell;
+        vertical-align: middle;
+        height: 100%;
+      }
+    }
+  }
+
+  .full-width {
+    width: 100%;
+  }
 }
 
 .mat-dialog-container {
@@ -13,4 +58,3 @@
     min-height: initial;
   }
 }
-

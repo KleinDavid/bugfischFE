@@ -44,45 +44,52 @@
         <div class="vertical-line-left"></div>
         <div class="vertical-line-right"></div>
         <div fxFlex="36px">
-            <div class="menu-top-icon" [ngClass]="isBold() ? 'menu-top-icon-active' : ''">
-                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onBoldClick()" fxFlex>format_bold
+            <div class="menu-top-icon" [ngClass]="isCssValueSet('font-weight', 'bold') ? 'menu-top-icon-active' : ''">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small"
+                    (click)="onTextStyleButtonClick('font-weight', 'bold', 'normal')" fxFlex>
+                    format_bold
                 </mat-icon>
             </div>
         </div>
         <div fxFlex="36px">
-            <div class="menu-top-icon" [ngClass]="isItalic() ? 'menu-top-icon-active' : ''">
-                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onItalicClick()" fxFlex>
-                    format_italic</mat-icon>
+            <div class="menu-top-icon" [ngClass]="isCssValueSet('font-style', 'italic') ? 'menu-top-icon-active' : ''">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small"
+                    (click)="onTextStyleButtonClick('font-style', 'italic', 'normal')" fxFlex>
+                    format_italic
+                </mat-icon>
             </div>
         </div>
         <div fxFlex="36px">
-            <div class="menu-top-icon" [ngClass]="isUnderlined() ? 'menu-top-icon-active' : ''">
-                <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onUnderlinedClick()" fxFlex>
-                    format_underlined</mat-icon>
+            <div class="menu-top-icon"
+                [ngClass]="isCssValueSet('text-decoration', 'underline') ? 'menu-top-icon-active' : ''">
+                <mat-icon id="menu-left-icon1" class="menu-top-icon-small"
+                    (click)="onTextStyleButtonClick('text-decoration', 'underline', 'none')" fxFlex>
+                    format_underlined
+                </mat-icon>
             </div>
         </div>
         <div class="vertical-line-left"></div>
         <div class="vertical-line-right"></div>
         <div fxFlex="36px">
-            <div class="menu-top-icon" [ngClass]="isAlign('left') ? 'menu-top-icon-active' : ''">
+            <div class="menu-top-icon" [ngClass]="isCssValueSet('text-align', 'left') ? 'menu-top-icon-active' : ''">
                 <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onAlignButtonClick('left')" fxFlex
                     [ngClass]="'menu-left-icon-active'">format_align_left</mat-icon>
             </div>
         </div>
         <div fxFlex="36px">
-            <div class="menu-top-icon" [ngClass]="isAlign('center') ? 'menu-top-icon-active' : ''">
+            <div class="menu-top-icon" [ngClass]="isCssValueSet('text-align','center') ? 'menu-top-icon-active' : ''">
                 <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onAlignButtonClick('center')" fxFlex
                     [ngClass]="'menu-left-icon-active'">format_align_center</mat-icon>
             </div>
         </div>
         <div fxFlex="36px">
-            <div class="menu-top-icon" [ngClass]="isAlign('right') ? 'menu-top-icon-active' : ''">
+            <div class="menu-top-icon" [ngClass]="isCssValueSet('text-align','right') ? 'menu-top-icon-active' : ''">
                 <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onAlignButtonClick('right')" fxFlex
                     [ngClass]="'menu-left-icon-active'">format_align_right</mat-icon>
             </div>
         </div>
         <div fxFlex="36px">
-            <div class="menu-top-icon" [ngClass]="isAlign('justify') ? 'menu-top-icon-active' : ''">
+            <div class="menu-top-icon" [ngClass]="isCssValueSet('text-align','justify') ? 'menu-top-icon-active' : ''">
                 <mat-icon id="menu-left-icon1" class="menu-top-icon-small" (click)="onAlignButtonClick('justify')"
                     fxFlex [ngClass]="'menu-left-icon-active'">format_align_justify</mat-icon>
             </div>
@@ -93,9 +100,14 @@
             <mat-form-field style="width: 100%" (click)='$event.stopPropagation()'>
                 <mat-label>FontFamily</mat-label>
                 <mat-select (openedChange)="disableLayoutDesinger.emit($event)"
-                    (selectionChange)="onFontFamilyChange($event.value)" [value]="getFont()">
+                    (selectionChange)="onFontFamilyChange($event.value)" [value]="getSelectedFont()">
                     <mat-option *ngFor="let font of fonts" [value]="font">
-                        {{font}}
+                        <ng-container *ngIf="font == ''">
+                            --
+                        </ng-container>
+                        <ng-container *ngIf="font != ''">
+                            {{font}}
+                        </ng-container>
                     </mat-option>
                 </mat-select>
             </mat-form-field>
@@ -120,5 +132,4 @@
         <div class="vertical-line-left"></div>
         <div class="vertical-line-right"></div>
     </div>
-
 </div>

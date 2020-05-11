@@ -51,7 +51,7 @@ export class HTMLDialog implements OnInit, AfterViewChecked, OnDestroy {
         transformableObjects.forEach(t => t.unselect());
         let style = document.createElement('style');
         transformableObjects.forEach(t => { style.innerHTML += t.getCss() });
-        cssClasses.forEach(t => { style.innerHTML += t.getCss() })
+        // cssClasses.forEach(t => { style.innerHTML += t.getCss() })
         console.log(style.outerHTML);
 
         let u = '<html lang="de"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Print-Layout | FDG-DUS | FDG-Dienst</title>' + style.outerHTML + '<style>.simple-image-box {overflow: hidden;width: 100%;height: 100%;  position: relative;}.simple-image {position: absolute;max-width: 100%;max-height: 100%;top: 0;bottom: 0;left: 0;right: 0;margin: auto;-webkit-user-select: none;-khtml-user-select: none;-moz-user-select: none;-o-user-select: none;user-select: none;}:host {display: block;left: 0;width: 100%;height: 100%;}</style></head><body>' + idCard.getFinalHTML() + '</body></html>'

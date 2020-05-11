@@ -1,21 +1,70 @@
 <div id="workflow-bpmn-modeler-dialog">
-    <div class="modeler-content">
-        <mat-form-field style="width: 100%">
-            <mat-label>ClassName</mat-label>
-            <input type="text" autocomplete="off" matInput [(ngModel)]="cssClass.name" placeholder="ClassName">
-        </mat-form-field>
-        <mat-form-field style="width: 100%">
-            <mat-label>Values</mat-label>
-            <textarea [(ngModel)]="cssClass.valueString" type="text" autocomplete="off" matInput
-                placeholder="Values"></textarea>
-        </mat-form-field>
-        <div fxLayout="row">
-            <div fxFlex="100" style="display: flex;">
-                <div style="margin-left: auto; margin-right: 12px">
-                    <button mat-raised-button color="primary" (click)="save()">Speicher</button>
+    <div class="modeler-content" fxLayout="row">
+        <div class="modeler-content-left" fxFlex="500px">
+            <mat-form-field style="width: 100%">
+                <mat-label>ClassName</mat-label>
+                <input type="text" autocomplete="off" matInput [(ngModel)]="cssClass.name" placeholder="ClassName">
+            </mat-form-field>
+            <mat-form-field style="width: 100%">
+                <mat-label>Values</mat-label>
+                <textarea [(ngModel)]="valueString" rows="12" type="text" autocomplete="off" matInput
+                    (keyup)="findBindingsInString($event.target.value)" placeholder="Values"></textarea>
+            </mat-form-field>
+            <div fxLayout="row">
+                <div fxFlex="100" style="display: flex;">
+                    <div style="margin-left: auto; margin-right: 12px">
+                        <button mat-raised-button color="primary" (click)="save()">Speicher</button>
+                    </div>
+                    <div>
+                        <a mat-raised-button target="_blank" (click)="close()">Abbrechen</a>
+                    </div>
                 </div>
-                <div>
-                    <a mat-raised-button target="_blank" (click)="close()">Abbrechen</a>
+            </div>
+        </div>
+        <div *ngIf="bindings.length > 0" fxFlex="250px" class="modeler-content-right" fxLayout="column">
+            <mat-form-field style="width: 100%">
+                <mat-label>Filter</mat-label>
+                <input type="text" autocomplete="off" matInput (keyup)="filterBindingsByName($event.target.value)"
+                    placeholder="Binding">
+            </mat-form-field>
+            <div class="global-class-cell vertical-center-box" fxFlex="36px" style="margin-top: -20px">
+                <div class="vertical-center">
+                    <div fxLayout="row" class="full-width">
+                        <div fxFlex>
+                            <div class="table">
+                                <div class="table-cell">Binding</div>
+                            </div>
+                        </div>
+                        <div fxFlex="100px">
+                            <div class="table">
+                                <div class="table-cell">
+                                    Value
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngFor="let binding of bindings" class="global-class-cell vertical-center-box" fxFlex="36px">
+                <div class="vertical-center">
+                    <div fxLayout="row" class="full-width">
+                        <div fxFlex style="overflow: hidden;">
+                            <div class="table">
+                                <div class="table-cell">{{binding.name}}</div>
+                            </div>
+                        </div>
+                        <div fxFlex="100px">
+                            <div class="table">
+                                <div class="table-cell">
+                                    <mat-form-field class="binding-form-field">
+                                        <mat-label></mat-label>
+                                        <input type="text" autocomplete="off" matInput [value]="binding.value"
+                                            (keyup)="setBindingValue(binding.name ,$event.target.value)" placeholder="">
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

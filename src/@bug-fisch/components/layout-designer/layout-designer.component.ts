@@ -166,6 +166,10 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
         this.createObject(new Position(event.clientX, event.clientY));
         this.selectedObject.editMode = LayoutDesignerlEditMode.Resize5;
         break;
+      case LayoutDesignerlCreationMode.Image:
+        this.createObject(new Position(event.clientX, event.clientY));
+        this.selectedObject.editMode = LayoutDesignerlEditMode.Resize5;
+        break;
       default:
         break;
     }
@@ -262,10 +266,10 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
     object.id = this.getNewObjectId();
     object.setParent(this.idCard);
     select ? object.select() : object.unselect();
-    
+
     object.create();
-    object.editEnd();  
-    
+    object.editEnd();
+
     // ?
     object.getAllChildren().forEach(c => { this.addObjectToView(c); })
     this.idCard.addChild(object, true);
@@ -318,7 +322,7 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
         break;
       case LayoutDesignerlCreationMode.Image:
         this.selectedObject = new EditableImage(id, imageSrc, this.idCard);
-        position = new Position(this.idCard.position.x, this.idCard.position.y);
+        //position = new Position(this.idCard.position.x, this.idCard.position.y);
         break;
       case LayoutDesignerlCreationMode.Circle:
         this.selectedObject = new Circle(id);
@@ -366,14 +370,14 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
   changeCreationMode(mode: number): void {
     if (mode === LayoutDesignerlCreationMode.Image) {
       this.currentDefaultObject = this.defaultEditableImage;
-      document.getElementById('imageUploader').click();
+      //document.getElementById('imageUploader').click();
     }
     if (mode === LayoutDesignerlCreationMode.Text) {
       this.currentDefaultObject = this.defaultTextField;
     }
     if (mode === LayoutDesignerlCreationMode.Rect) {
       this.currentDefaultObject = this.defaultRect;
-      
+
     }
     if (mode === LayoutDesignerlCreationMode.Circle) {
       this.currentDefaultObject = this.defaultCircle;
@@ -481,7 +485,7 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
     this.idCard.render();
   }
 
-  disableLayoutDesinger(event: boolean){
+  disableLayoutDesinger(event: boolean) {
     this.disableAll = event;
   }
 }

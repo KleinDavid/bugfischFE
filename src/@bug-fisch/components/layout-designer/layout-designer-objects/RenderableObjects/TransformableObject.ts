@@ -4,7 +4,7 @@ import { TransformRect } from './TransformRect';
 import { Position } from '../Position';
 import { Subject } from 'rxjs';
 import { Transformation } from '../Transformation';
-import { CssClass } from '../CssClass';
+import { CssClass, CssClassValue } from '../CssClass';
 
 export abstract class TransformableObject extends RenderableObject {
 
@@ -21,7 +21,7 @@ export abstract class TransformableObject extends RenderableObject {
   abstract type: string;
   abstract typeName: string;
   abstract icon: string;
-  
+
   relativeWidthToParent: number;
   relativeHeightToParent: number;
   relativePositionToParent: Position;
@@ -40,7 +40,15 @@ export abstract class TransformableObject extends RenderableObject {
   }
 
   render(): void {
-
+    let values = [
+      { valueName: 'left', value: this.position.x + '' },
+      { valueName: 'top', value: this.position.y + '' },
+      { valueName: 'width', value: this.width + '' },
+      { valueName: 'height', value: this.height + '' },
+      { valueName: 'z-index', value: this.zIndex + '' },
+      { valueName: 'border-width', value: this.borderWidth + '' }
+    ];
+    this.cssClassPosition.setValuesByList(values);
   }
 
   checkIfObjectIsThere(x: number, y: number): boolean {
@@ -359,14 +367,53 @@ export abstract class TransformableObject extends RenderableObject {
   }
 
   updateClasses(): void {
-    this.htmlElementRef.className = '';
-    this.htmlElementRef.classList.add(this.type + '-' + this.id);
-    this.cssClassList.forEach(c => {
-      this.htmlElementRef.classList.add(c.name);
+    //this.htmlElementRef.className = '';
+    let classString = ''
+    
+    this.cssClassList.filter(c => c.isClassOfHtmlParent).forEach(c => {
+      classString += c.name + ' '
+    });
+    this.htmlElementRef.className = classString;
+  }
+
+  getCss(): string {
+    return ''
+  }
+
+  setCssValue(valueName: string, value: string): void {
+    if (['left', 'top', 'width', 'height', 'z-index', 'border-width'].includes(valueName)) {
+      this.position.x = valueName === 'left' ? parseInt(value) : this.position.x;
+      this.position.y = valueName === 'top' ? parseInt(value) : this.position.y;
+      this.height = valueName === 'height' ? parseInt(value) : this.height;
+      this.width = valueName === 'width' ? parseInt(value) : this.width;
+      this.zIndex = valueName === 'z-index' ? parseInt(value) : this.zIndex;
+      this.borderWidth = valueName === 'border-width' ? parseInt(value) : this.borderWidth;
+      this.render();
+      this.createTransformRects();
+    }
+    this.cssClassList.filter(c => c.getValueByName(valueName)).forEach(c => {
+      c.setValue(valueName, value);
     });
   }
 
-  getCss():string {
-    return ''
+  getCssValue(valueName: string): CssClassValue {
+    for (let cssClass of this.cssClassList) {
+      if(cssClass.getValueByName(valueName)){
+        return cssClass.getValueByName(valueName);
+      }
+    }
+  }
+
+  protected createCssElement(id: string, propertyList: {valueName: string, value: string}[], htmlRefList: HTMLElement[], menuRightEditable: boolean = true, withFactory: boolean = true, isClassOfHtmlParent: boolean = true): CssClass {
+    let cssClass = new CssClass(id);
+    cssClass.menuRightEditable = menuRightEditable;
+    cssClass.create();
+    cssClass.setValuesByList(propertyList, withFactory);
+    cssClass.isClassOfHtmlParent = isClassOfHtmlParent;
+    htmlRefList.forEach(e => {
+      e.classList.add(cssClass.name);
+    });
+    this.cssClassList.push(cssClass);
+    return cssClass;
   }
 }

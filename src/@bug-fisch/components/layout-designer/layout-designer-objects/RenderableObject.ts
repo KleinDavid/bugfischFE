@@ -26,8 +26,8 @@ export abstract class RenderableObject {
   protected childList: TransformableObject[] = [];
 
   protected htmlElementRef: HTMLElement;
-  protected styleSheetPosition: HTMLStyleElement;
   protected styleSheet: HTMLStyleElement;
+  protected styleSheetPosition: HTMLStyleElement;
 
   cssClassList: CssClass[] = [];
   cssClassPosition: CssClass = new CssClass();

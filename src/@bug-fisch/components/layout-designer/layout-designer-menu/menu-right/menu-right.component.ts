@@ -1,7 +1,7 @@
 import { Component, Output, EventEmitter, OnInit, Input } from '@angular/core';
 import { LayoutDesignerlCreationMode, LayoutDesignerImagePosition } from '../../layout-designer-objects/Enums'; import { TransformableObject } from '../../layout-designer-objects/RenderableObjects/TransformableObject';
 import { Transformation } from '../../layout-designer-objects/Transformation';
-import { CssClass } from '../../layout-designer-objects/CssClass';
+import { CssClass, CssClassValue, CssValueType } from '../../layout-designer-objects/CssClass';
 import { MatDialog } from '@angular/material/dialog';
 import { CSSDialog } from '../../dialogs/css-dialog/css-dialog.component';
 ;
@@ -23,6 +23,8 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
   @Output() change: EventEmitter<any> = new EventEmitter();
   @Output() disableLayoutDesinger: EventEmitter<boolean> = new EventEmitter();
 
+  CssValueType = CssValueType;
+
   colors: any = {};
   creationModes = LayoutDesignerlCreationMode;
   imagePositions = LayoutDesignerImagePosition;
@@ -32,7 +34,7 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
   constructor(private cssDialog: MatDialog) {
     let testClass = new CssClass();
     testClass.name = 'borderLeft';
-    testClass.valueString = 'border-left: 1px solid black';
+    // testClass.valueString = 'border-left: 1px solid black';
     this.globalCssClasses.push(testClass);
     testClass.create();
   }
@@ -42,20 +44,17 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
     this.colors['borderColor'] = '';
   }
 
-  clickMenu(btnNumber: number) {
-  }
-
   checkEditMode(btnNumber: number) {
     return btnNumber === this.currentCreationMode;
   }
 
-  setInput(): void {
-
-  }
-
-  getEditableValuesOfSelectedObject(): any {
+  getEditableValuesOfSelectedObject(): CssClassValue[] {
     if (this.selectedObject) {
-      return this.selectedObject.editableProperties;
+      let list = [];
+      this.selectedObject.cssClassList.filter(c => c.menuRightEditable).forEach(cl => {
+        list = list.concat(cl.valueList);
+      });
+      return list.filter(v => v.editable);
     } else {
       return [];
     }
@@ -70,51 +69,11 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
         return '';
       }
     }
-    if (this.getValueType(valueName) == 'number') {
-      return (returnValue | 0) as number;
-    }
     return returnValue;
   }
 
   setValue(valueName: string, value: any) {
-    let transformation = new Transformation;
-    transformation.propertyName = valueName;
-    transformation.valueBefore = this.getValue(valueName);
-
-    let prop = this.selectedObject;
-    let list = valueName.split('.');
-
-    for (let i = 0; i < list.length - 1; i++) {
-      prop = prop[list[i]];
-    }
-    let type = this.getValueType(valueName);
-    if (type === 'number') {
-      if (this.getMaxValue(valueName) < parseInt(value)) { value = this.getMaxValue(valueName); }
-      if (this.getMinValue(valueName) > parseInt(value)) { value = this.getMinValue(valueName); }
-      prop[list[list.length - 1]] = parseInt(value) as number;
-    } else if (type === 'string') {
-      prop[list[list.length - 1]] = value + '' as string;
-    } else {
-      prop[list[list.length - 1]] = value;
-    }
-    transformation.valueAfter = this.getValue(valueName);
-    this.selectedObject.getPositionAndSizeChanceSubject().next(transformation);
-    this.change.emit();
-  }
-
-  getValueType(valueName: string): string {
-    let returnValue = this.selectedObject;
-    valueName.split('.').forEach((name: string) => {
-      returnValue = returnValue[name];
-    });
-    if (valueName + 'Properties' in this.selectedObject) {
-      return 'list';
-    }
-
-    if (valueName + 'PropertiesNotFixed' in this.selectedObject) {
-      return 'listAndWrite';
-    }
-    return typeof returnValue;
+    this.selectedObject.setCssValue(valueName, value);
   }
 
   checkEnterPress(keyCode: string, valueName: string, value: any): void {
@@ -123,53 +82,13 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
     }
   }
 
-  getColorPickerWidth(): string {
-    if (document.getElementsByClassName('$valueInput').length === 0) {
-      return '0';
-    }
-    return (document.getElementsByClassName('$valueInput')[0].getBoundingClientRect().width - 1) + '';
-  }
-
-  getPropertyByValueName(valueName: string): any {
-    let prop = this.selectedObject;
-    let list = valueName.split('.');
-
-    for (let i = 0; i < list.length - 1; i++) {
-      prop = prop[list[i]];
-    }
-    return prop[list[list.length - 1]];
-  }
-
-  getColorByName(valueName: string): string {
-    if (valueName in this.colors) {
-      return this.colors[valueName];
-    } else {
-      this.colors[valueName] = this.getValue(valueName);
-    }
-    return this.colors[valueName];
-  }
-
   colorChanged(valueName: string, event: string): void {
-    if(valueName in this.colors){
-      if(this.colors[valueName] !== event){
+    if (valueName in this.colors) {
+      if (this.colors[valueName] !== event) {
         this.setValue(valueName, event);
       }
     }
     this.colors[valueName] = event;
-  }
-
-  getSelectListByValueName(valueName: string): string[] {
-    return this.selectedObject[valueName + 'Properties'];
-  }
-
-  getMaxValue(valueName: string): number {
-    if (valueName === 'zIndex') { return 999; }
-    return Number.MAX_SAFE_INTEGER;
-  }
-
-  getMinValue(valueName: string): number {
-    if (['position.x', 'position.y'].includes(valueName)) { return Number.MIN_SAFE_INTEGER; }
-    return 0;
   }
 
   addCssClass(value: CssClass) {
@@ -196,8 +115,8 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
       this.disableLayoutDesinger.emit(false);
       let cssClassNew = res.data.cssClass as CssClass;
       cssClass.name = cssClassNew.name;
-      cssClass.valueString = cssClassNew.valueString;
-      cssClass.create();
+      cssClass.valueList = cssClassNew.valueList;
+      cssClass.update();
       this.selectedObject.updateClasses();
     });
   }
@@ -216,7 +135,7 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
       this.disableLayoutDesinger.emit(false);
       let cssClassNew = res.data.cssClass as CssClass;
       cssClass.name = cssClassNew.name;
-      cssClass.valueString = cssClassNew.valueString;
+      cssClass.valueList = cssClassNew.valueList;
       if (cssClassNew.name !== '') {
         this.selectedObject.addClass(cssClass);
         this.globalCssClasses.push(cssClass);
@@ -226,9 +145,15 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
   }
 
   getHalfPropertyClass(valueName: string): string {
-    if (!this.selectedObject.halfStyleProperties.includes(valueName)) {
+    let halfProps = this.getEditableValuesOfSelectedObject().filter(v => v.smallEditField);
+    let prop = halfProps.find(v => v.valueName === valueName)
+    if (!prop) {
       return '';
     }
-    return this.selectedObject.halfStyleProperties.indexOf(valueName) % 2 === 0 ? 'padding-right' : 'padding-left';
+    return halfProps.indexOf(prop) % 2 === 0 ? 'padding-right' : 'padding-left';
+  }
+
+  getActiveClasses(): CssClass[]{
+    return this.selectedObject.cssClassList.filter(c => c.active);
   }
 }

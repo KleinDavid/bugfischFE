@@ -59,7 +59,7 @@ export class CSSGlobalDialog implements OnInit {
                 this.cssClass = JSON.parse(JSON.stringify(this.cssClass));
             } else {
                 this.selectedClass.name = this.cssClass.name;
-                this.selectedClass.valueString = this.cssClass.valueString;
+                // this.selectedClass.valueString = this.cssClass.valueString;
             }
             this.selectedClass.create();
         }
