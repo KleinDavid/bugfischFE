@@ -51,7 +51,7 @@ export class SelectionWrapper extends TransformableObject {
 
   create(): void {
     this.htmlElementRef = document.createElement('div');
-    this.htmlElementRef.id = this.id;
+    this.htmlElementRef.id = this.type + '-' + this.id;
     document.getElementById(this.parent.id).appendChild(this.htmlElementRef);
     this.render();
   }

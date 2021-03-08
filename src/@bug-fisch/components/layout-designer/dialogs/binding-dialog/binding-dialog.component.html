@@ -1,0 +1,130 @@
+<div id="workflow-bpmn-modeler-dialog">
+    <div class="modeler-content" fxLayout="row">
+        <!--<div fxLayout="row">
+            <div fxFlex="30">
+                <div fxLayout="column">
+                    <mat-form-field style="width: 100%">
+                        <mat-label>Filter</mat-label>
+                        <input (input)="filterBindings($event.target.value)" type="text" autocomplete="off" matInput
+                            placeholder="Filter">
+                    </mat-form-field>
+                    <div fxFlex fxLayout="column" class="class-list">
+                        <div *ngFor="let binding of filteredBindings" class="global-class-cell"
+                            (click)="onSelectBinding(binding)" fxFlex="36px"
+                            [ngClass]="isBindingSelected(binding) ? 'selectedClass': ''">
+                            <div style="display: table; height:100%">
+                                <div style="display: table-cell; vertical-align: middle">{{binding.name}}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>-->
+        <div class="modeler-content-right" fxLayout="column">
+            <mat-form-field style="width: 100%">
+                <mat-label>Filter</mat-label>
+                <input type="text" autocomplete="off" matInput (keyup)="filterBindings($event.target.value)"
+                    placeholder="Binding" [value]="filterValue">
+            </mat-form-field>
+            <div class="global-class-cell vertical-center-box" fxFlex="36px" style="margin-top: -20px">
+                <div class="vertical-center">
+                    <div fxLayout="row" class="full-width">
+                        <div fxFlex="275px">
+                            <div class="table">
+                                <div class="table-cell">Binding</div>
+                            </div>
+                        </div>
+                        <div fxFlex="275px">
+                            <div class="table">
+                                <div class="table-cell">
+                                    Value
+                                </div>
+                            </div>
+                        </div>
+                        <div fxFlex>
+                            <div class="table">
+                                <div class="table-cell">
+                                    Verwendet
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div *ngFor="let binding of filteredBindings" class="global-class-cell vertical-center-box hover-cell"
+                fxFlex="36px">
+                <div class="vertical-center" (click)="onSelectBinding(binding)">
+                    <div fxLayout="row" class="full-width">
+                        <div fxFlex="275px" style="overflow: hidden;">
+                            <div class="table">
+                                <div class="table-cell">{{binding.name}}</div>
+                            </div>
+                        </div>
+                        <div fxFlex="275px">
+                            <div class="table">
+                                <div class="table-cell">
+                                    <ng-container *ngIf="!isBindingSelected(binding)">{{binding.value}}</ng-container>
+
+                                    <ng-container *ngIf="isBindingSelected(binding)">
+                                        <mat-form-field *ngIf="!binding.ofImage" class="binding-form-field">
+                                            <input type="text" autocomplete="off" matInput [value]="binding.value"
+                                                (keyup)="setBindingValue(binding.name ,$event.target.value)"
+                                                placeholder="">
+                                        </mat-form-field>
+                                        <ng-container *ngIf="binding.ofImage">
+                                            <div fxFlex fxLayout="row">
+                                                <div class="inputAndSelect" fxFlex>
+                                                    <mat-form-field style="width: 100%" class="binding-form-field">
+                                                        <input type="text" autocomplete="off" matInput
+                                                            [value]="binding.value"
+                                                            (keyup)="setBindingValue(binding.name ,$event.target.value)">
+                                                        <mat-select
+                                                            (selectionChange)="setBindingValue(binding.name ,$event.value)">
+                                                            <mat-option
+                                                                *ngFor="let data of fileManager.getAllImageFiles()"
+                                                                [value]="data.path">
+                                                                {{data.name}}
+                                                            </mat-option>
+                                                        </mat-select>
+                                                    </mat-form-field>
+                                                </div>
+                                                <div fxFlex="36px">
+                                                    <div class="menu-top-icon" style="margin-top: 26px">
+                                                        <mat-icon class="menu-top-icon-small"
+                                                            (click)="uploadImageFile()" fxFlex
+                                                            [ngClass]="'menu-left-icon-active'">folder_open
+                                                        </mat-icon>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </ng-container>
+                                    </ng-container>
+
+                                </div>
+                            </div>
+                        </div>
+                        <div fxFlex>
+                            <div class="table">
+                                <div class="table-cell">
+                                    {{binding.countOfUse}} mal
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div fxLayout="column" style="height: 100%">
+                <div fxFlex="12px"></div>
+                <div fxFlex="36px">
+                    <div fxLayout="row">
+                        <div fxFlex="100" style="display: flex;">
+                            <div style="margin-left: auto">
+                                <a mat-raised-button target="_blank" (click)="close()">Schließen</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

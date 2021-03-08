@@ -25,6 +25,11 @@ export class Circle extends TransformableObject {
 
     constructor(id: string) {
         super(id);
+
+    }
+
+    create(): void {
+
         this.htmlElementRef = document.createElement('div');
         this.htmlElementRef.id = this.id;
         this.cssClassList.forEach(c => {
@@ -37,9 +42,10 @@ export class Circle extends TransformableObject {
         this.svgElementRef.appendChild(this.ellipseElementRef);
         this.htmlElementRef.appendChild(this.svgElementRef);
 
-        this.cssClassPosition = new CssClass(this.type + '-' + this.id + '-position');
-        this.htmlElementRef.classList.add(this.cssClassPosition.name);
-        this.svgElementRef.classList.add(this.cssClassPosition.name);
+        let htmlRefList = [this.htmlElementRef];
+        let id = this.type + '-' + this.id + '-position';
+        this.cssClassPosition = this.createCssElement(id, [], htmlRefList);
+        this.svgElementRef.classList.add(id);
 
         let standardValuesClass = new CssClass(this.type + '-' + this.id + '-style');
         standardValuesClass.setValuesByList(this.cssClassStyleProperties);
@@ -51,9 +57,8 @@ export class Circle extends TransformableObject {
         styleClass.setValuesByList(this.cssClassEllipseStyleProperties);
         this.cssClassList.push(styleClass)
         this.ellipseElementRef.classList.add(styleClass.name);
-    }
 
-    create(): void {
+
         this.cssClassPosition.create();
         this.cssClassList.forEach(c => c.create());
 
@@ -73,8 +78,8 @@ export class Circle extends TransformableObject {
             { valueName: 'width', value: this.width + '' },
             { valueName: 'height', value: this.height + '' },
             { valueName: 'z-index', value: this.zIndex + '' },
-
         ];
+
         this.cssClassPosition.setValuesByList(values);
         this.createTransformRects();
     }

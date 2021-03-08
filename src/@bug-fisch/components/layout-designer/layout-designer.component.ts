@@ -10,9 +10,9 @@ import { EditableImage } from './layout-designer-objects/RenderableObjects/Trans
 import { Circle } from './layout-designer-objects/RenderableObjects/TransformableObjects/Circle';
 import { TextField } from './layout-designer-objects/RenderableObjects/TransformableObjects/TextField';
 import { RenderableObject } from './layout-designer-objects/RenderableObject';
-import { HTMLDialog } from './html-dialog/html-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { CssClass } from './layout-designer-objects/CssClass';
+import { HTMLDialog } from './dialogs/html-dialog/html-dialog.component';
 
 @Component({
   selector: 'atled-layout-designer',
@@ -85,8 +85,6 @@ export class LayoutDesignerComponent implements OnInit, AfterViewInit {
   defaultEditableImage: EditableImage;
 
   currentDefaultObject: TransformableObject;
-
-  globalCssClasses: CssClass[] = [];
 
   constructor(private htmlDialog: MatDialog) {
   }

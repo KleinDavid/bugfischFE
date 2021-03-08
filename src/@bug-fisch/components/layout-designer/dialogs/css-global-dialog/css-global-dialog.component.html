@@ -1,55 +1,104 @@
 <div id="workflow-bpmn-modeler-dialog">
-    <div class="modeler-content">
-        <div fxLayout="row">
-            <div fxFlex="30">
-                <div fxLayout="column">
-                    <mat-form-field style="width: 100%">
-                        <mat-label>Filter</mat-label>
-                        <input (input)="filterClasses($event.target.value)" type="text" autocomplete="off" matInput
-                            placeholder="Filter">
-                    </mat-form-field>
-                    <div fxFlex fxLayout="column" class="class-list">
-                        <div *ngFor="let class of globalClassesFiltered" class="global-class-cell"
-                            (click)="onClassClick(class)" fxFlex="36px"
-                            [ngClass]="isClassSelected(class) ? 'selectedClass': ''">
-                            <div style="display: table; height:100%">
-                                <div style="display: table-cell; vertical-align: middle">{{class.name}}</div>
+    <div class="modeler-content" fxLayout="row">
+        <div class="modeler-content-left" fxFlex="800px">
+            <div fxLayout="row">
+                <div fxFlex="30">
+                    <div fxLayout="column">
+                        <mat-form-field style="width: 100%">
+                            <mat-label>Filter</mat-label>
+                            <input (input)="filterClasses($event.target.value)" type="text" autocomplete="off" matInput
+                                placeholder="Filter">
+                        </mat-form-field>
+                        <div fxFlex fxLayout="column" class="class-list">
+                            <div *ngFor="let class of globalClassesFiltered" class="global-class-cell"
+                                (click)="onClassClick(class)" fxFlex="36px"
+                                [ngClass]="isClassSelected(class) ? 'selectedClass': ''">
+                                <div style="display: table; height:100%">
+                                    <div style="display: table-cell; vertical-align: middle">{{class.name}}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div fxLayout="row">
+                            <div fxFlex="auto"></div>
+                            <div fxFlex="64px">
+                                <button mat-raised-button color="primary" (click)="addClass()">
+                                    <mat-icon>add</mat-icon>
+                                </button></div>
+                        </div>
+                    </div>
+                </div>
+                <div fxFlex="12px"></div>
+                <div fxFlex="11px" class="border-left"></div>
+                <div fxFlex>
+                    <div fxLayout="column" style="height: 100%">
+                        <div fxFlex="auto">
+                            <mat-form-field style="width: 100%">
+                                <mat-label>ClassName</mat-label>
+                                <input type="text" autocomplete="off" matInput [(ngModel)]="cssClass.name"
+                                    placeholder="ClassName">
+                            </mat-form-field>
+                            <mat-form-field style="width: 100%">
+                                <mat-label>Values</mat-label>
+                                <textarea [(ngModel)]="valueString" (keyup)="findBindingsInString($event.target.value)" rows="6" type="text" autocomplete="off" matInput
+                                    placeholder="Values"></textarea>
+                            </mat-form-field>
+                        </div>
+                        <div fxFlex="36px">
+                            <div fxLayout="row">
+                                <div fxFlex="100" style="display: flex;">
+                                    <div style="margin-left: auto; margin-right: 12px">
+                                        <button mat-raised-button color="primary" (click)="save()">Speicher</button>
+                                    </div>
+                                    <div>
+                                        <a mat-raised-button target="_blank" (click)="close()">Abbrechen</a>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div fxLayout="row">
-                        <div fxFlex="auto"></div>
-                        <div fxFlex="64px">
-                            <button mat-raised-button color="primary" (click)="addClass()">
-                                <mat-icon>add</mat-icon>
-                            </button></div>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="bindings.length > 0" fxFlex="250px" class="modeler-content-right" fxLayout="column">
+            <mat-form-field style="width: 100%">
+                <mat-label>Filter</mat-label>
+                <input type="text" autocomplete="off" matInput (keyup)="filterBindingsByName($event.target.value)"
+                    placeholder="Binding">
+            </mat-form-field>
+            <div class="global-class-cell vertical-center-box" fxFlex="36px" style="margin-top: -20px">
+                <div class="vertical-center">
+                    <div fxLayout="row" class="full-width">
+                        <div fxFlex>
+                            <div class="table">
+                                <div class="table-cell">Binding</div>
+                            </div>
+                        </div>
+                        <div fxFlex="100px">
+                            <div class="table">
+                                <div class="table-cell">
+                                    Value
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div fxFlex="12px"></div>
-            <div fxFlex="11px" class="border-left"></div>
-            <div fxFlex>
-                <div fxLayout="column" style="height: 100%">
-                    <div fxFlex="auto">
-                        <mat-form-field style="width: 100%">
-                            <mat-label>ClassName</mat-label>
-                            <input type="text" autocomplete="off" matInput [(ngModel)]="cssClass.name"
-                                placeholder="ClassName">
-                        </mat-form-field>
-                        <mat-form-field style="width: 100%">
-                            <mat-label>Values</mat-label>
-                            <textarea [(ngModel)]="cssClass.valueString" rows="6" type="text" autocomplete="off"
-                                matInput placeholder="Values"></textarea>
-                        </mat-form-field>
-                    </div>
-                    <div fxFlex="36px">
-                        <div fxLayout="row">
-                            <div fxFlex="100" style="display: flex;">
-                                <div style="margin-left: auto; margin-right: 12px">
-                                    <button mat-raised-button color="primary" (click)="save()">Speicher</button>
-                                </div>
-                                <div>
-                                    <a mat-raised-button target="_blank" (click)="close()">Abbrechen</a>
+            <div *ngFor="let binding of bindings" class="global-class-cell vertical-center-box" fxFlex="36px">
+                <div class="vertical-center">
+                    <div fxLayout="row" class="full-width">
+                        <div fxFlex style="overflow: hidden;">
+                            <div class="table">
+                                <div class="table-cell">{{binding.name}}</div>
+                            </div>
+                        </div>
+                        <div fxFlex="100px">
+                            <div class="table">
+                                <div class="table-cell">
+                                    <mat-form-field class="binding-form-field">
+                                        <mat-label></mat-label>
+                                        <input type="text" autocomplete="off" matInput [value]="binding.value"
+                                            (keyup)="setBindingValue(binding.name ,$event.target.value)" placeholder="">
+                                    </mat-form-field>
                                 </div>
                             </div>
                         </div>

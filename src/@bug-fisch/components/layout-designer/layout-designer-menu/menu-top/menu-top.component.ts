@@ -4,8 +4,10 @@ import { CssClass } from '../../layout-designer-objects/CssClass';
 import { CSSGlobalDialog } from '../../dialogs/css-global-dialog/css-global-dialog.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TransformableObject } from '../../layout-designer-objects/RenderableObjects/TransformableObject';
-import { HTMLDialog } from '../../html-dialog/html-dialog.component';
 import { IdCard } from '../../layout-designer-objects/RenderableObjects/IdCard';
+import { BindingDialog } from '../../dialogs/binding-dialog/binding-dialog.component';
+import { DesignerCssClassManager } from '../../managers/designerCssClassManager';
+import { HTMLDialog } from '../../dialogs/html-dialog/html-dialog.component';
 
 
 @Component({
@@ -15,7 +17,6 @@ import { IdCard } from '../../layout-designer-objects/RenderableObjects/IdCard';
 })
 export class LayoutDesignerMenuTopComponent implements OnInit {
 
-  @Input() globalCssClasses: CssClass[] = [];
   @Input() cardDirection = 0;
   @Input() visible: boolean = true;
   @Input() currentCreationMode: LayoutDesignerlCreationMode = LayoutDesignerlCreationMode.None;
@@ -31,6 +32,8 @@ export class LayoutDesignerMenuTopComponent implements OnInit {
   styleSheet: HTMLStyleElement;
   fontFileName: string;
   fonts: string[] = [''];
+
+  private cssClassManager: DesignerCssClassManager = DesignerCssClassManager.getInstance();
 
   constructor(private dialogRef: MatDialog, ) {
   }
@@ -81,10 +84,11 @@ export class LayoutDesignerMenuTopComponent implements OnInit {
     const dialogRef = this.dialogRef.open(CSSGlobalDialog, {
       panelClass: 'global-classes-dialog',
       autoFocus: false,
-      data: { globalClasses: this.globalCssClasses }
+      data: { }
     });
 
     dialogRef.afterClosed().subscribe(() => {
+      this.cssClassManager.updateClasses();
       this.disableLayoutDesinger.emit(false);
       this.transformableObjects.forEach(t => { t.updateClasses() })
     });
@@ -94,7 +98,7 @@ export class LayoutDesignerMenuTopComponent implements OnInit {
     const dialogRef = this.dialogRef.open(HTMLDialog, {
       panelClass: 'full-width-dialog',
       autoFocus: false,
-      data: { idCard: this.idCard, transformableObjects: this.transformableObjects, cssClasses: this.globalCssClasses }
+      data: { idCard: this.idCard, transformableObjects: this.transformableObjects }
     });
 
     dialogRef.afterClosed().subscribe(() => {
@@ -148,5 +152,22 @@ export class LayoutDesignerMenuTopComponent implements OnInit {
 
   onUploadFontClick(): void {
     document.getElementById('fontUploader').click();
+  }
+
+  openBindingDialog() {
+    this.disableLayoutDesinger.emit(true);
+    const dialogRef = this.dialogRef.open(BindingDialog, {
+      panelClass: 'binding-dialog',
+      autoFocus: false,
+      data: { filterValue: '' }
+    });
+
+    dialogRef.afterClosed().subscribe((res: any) => {
+      this.transformableObjects.filter(o => o.type === 'TextField').forEach(o => {
+        this.cssClassManager.updateClasses();
+        o.unselect();
+      });
+      this.disableLayoutDesinger.emit(false);
+    });
   }
 }

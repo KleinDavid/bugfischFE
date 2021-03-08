@@ -5,14 +5,17 @@ import { Position } from '../../Position';
 import { LayoutDesignerImagePosition } from '../../Enums';
 import { CssClass } from '../../CssClass';
 import { DesignerFile, DesignerFileManager } from '../../../managers/designerFileManager';
+import { DesignerBindingManager } from '../../../managers/designerBindingManager';
 
 export class EditableImage extends TransformableObject {
   icon: string = 'crop_original';
   type = 'EditableImage';
   typeName = 'Bild';
-  fileManager = DesignerFileManager.getInstance();
+  private fileManager: DesignerFileManager = DesignerFileManager.getInstance();
+  private bindingManager: DesignerBindingManager = DesignerBindingManager.getInstance();
 
   imageSrcBase64: string = '';
+  imagePath: string = 'assets/default-image.png';
   imageFile: DesignerFile;
   // idCard: IdCard;
   imageOriginalWidth: number;
@@ -79,9 +82,6 @@ export class EditableImage extends TransformableObject {
 
   private cssClassBackground: CssClass;
 
-  private wontToCreate: boolean = false;
-  private imageLoaded: boolean = false;
-
   constructor(id: string, imageSrc: string = 'assets/default-image.png', idCard: IdCard) {
     super(id);
 
@@ -89,7 +89,7 @@ export class EditableImage extends TransformableObject {
     this.editableProperties.concat([]);
 
     let i = new Image();
-    
+
     // i.onload = () => {
     //   this.width = i.width;
     //   this.height = i.height;
@@ -145,10 +145,9 @@ export class EditableImage extends TransformableObject {
     this.simpleImageBoxRef.classList.add('simple-image-box');
 
     this.simpleImageRef.classList.add('simple-image');
-    this.simpleImageRef.src = this.imageSrcBase64;
+    this.simpleImageRef.src = this.imageFile.src;
 
     this.simpleImageBoxRef.appendChild(this.simpleImageRef);
-
 
     // css
     let htmlRefList = [this.htmlElementRef];
@@ -161,15 +160,16 @@ export class EditableImage extends TransformableObject {
 
     htmlRefList = [this.simpleImageRef];
     id = this.type + '-' + this.id + '-centerd-image-child';
-    this.imageClasses.push(this.createCssElement(id, this.cssClassCenteredImageChildProperties, htmlRefList, false, false, false));
+    this.imageClasses.push(this.createCssElement(id, this.cssClassCenteredImageChildProperties, htmlRefList, true, false, false));
 
     htmlRefList = [this.simpleImageBoxRef];
     id = this.type + '-' + this.id + '-centerd-image-parent';
-    this.imageClasses.push(this.createCssElement(id, this.cssClassCenteredImageParentProperties, htmlRefList, false, false, false));
+    this.imageClasses.push(this.createCssElement(id, this.cssClassCenteredImageParentProperties, htmlRefList, true, false, false));
 
     htmlRefList = [this.htmlElementRef];
     id = this.type + '-' + this.id + '-background';
-    this.cssClassBackground = this.createCssElement(id, this.cssClassBackgroundProperties, htmlRefList, false, false);
+    this.cssClassBackground = this.createCssElement(id, this.cssClassBackgroundProperties, htmlRefList, true, false);
+    this.cssClassBackground.blockValueByName('background-image');
 
     this.setImagePosition(this.imagePosition);
 
@@ -180,33 +180,71 @@ export class EditableImage extends TransformableObject {
   private setImagePosition(value: LayoutDesignerImagePosition) {
     this.imagePosition = value;
     this.htmlElementRef.innerHTML = '';
+    // switch (this.imagePosition) {
+    //   case LayoutDesignerImagePosition.AdaptWidht:
+    //     this.cssClassBackground.setValuesByList(this.cssClassBackgroundAdaptWidhtProperties);
+    //     this.cssClassBackground.setValue('background-image', this.fileManager.getImageSrcByPath(this.imagePath));
+    //     this.cssClassBackground.active = true;
+    //     this.imageClasses.forEach(c => c.active = false)
+    //     this.cssClassBackground.setBindingByName('background-image', '');
+    //     this.htmlElementRef.style.backgroundImage = this.fileManager.getImageSrcByPath(this.imagePath);
+    //     break;
+    //   case LayoutDesignerImagePosition.Adapt:
+    //     this.cssClassBackground.setValuesByList(this.cssClassBackgroundAdaptProperties);
+    //     this.cssClassBackground.setValue('background-image', this.fileManager.getImageSrcByPath(this.imagePath));
+    //     this.cssClassBackground.active = true;
+    //     this.imageClasses.forEach(c => c.active = false);
+    //     this.cssClassBackground.setBindingByName('background-image', '');
+    //     this.htmlElementRef.style.backgroundImage = this.fileManager.getImageSrcByPath(this.imagePath);
+    //     break;
+    //   case LayoutDesignerImagePosition.AdaptHeight:
+    //     this.cssClassBackground.setValuesByList(this.cssClassBackgroundAdaptHeightProperties);
+    //     this.cssClassBackground.setValue('background-image', this.fileManager.getImageSrcByPath(this.imagePath));
+    //     this.cssClassBackground.active = true;
+    //     this.imageClasses.forEach(c => c.active = false);
+    //     this.cssClassBackground.setBindingByName('background-image', '');
+    //     this.htmlElementRef.style.backgroundImage = this.fileManager.getImageSrcByPath(this.imagePath);
+    //     break;
+    //   case LayoutDesignerImagePosition.Center:
+    //     this.cssClassBackground.setValue('background-image', 'none');
+    //     this.simpleImageRef.src = this.fileManager.getImageSrcByPath(this.imagePath);
+    //     this.htmlElementRef.appendChild(this.simpleImageBoxRef);
+    //     this.cssClassBackground.active = false;
+    //     this.imageClasses.forEach(c => c.active = true);
+    //     this.htmlElementRef.style.backgroundImage = '';
+    //     break;
+    //   default:
+    //     break;
+    // }
     switch (this.imagePosition) {
       case LayoutDesignerImagePosition.AdaptWidht:
         this.cssClassBackground.setValuesByList(this.cssClassBackgroundAdaptWidhtProperties);
-        this.cssClassBackground.setValue('background-image', this.imageSrcBase64);
-        this.cssClassBackground.active = true;   
+        this.cssClassBackground.setValue('background-image', this.imagePath);
+        this.cssClassBackground.active = true;
         this.imageClasses.forEach(c => c.active = false)
-        this.cssClassBackground.setBindingByName('background-image', 'Image1');
+        this.cssClassBackground.setBindingByName('background-image', '');
         break;
       case LayoutDesignerImagePosition.Adapt:
         this.cssClassBackground.setValuesByList(this.cssClassBackgroundAdaptProperties);
-        this.cssClassBackground.setValue('background-image', this.imageSrcBase64);
-        this.cssClassBackground.active = true;        
+        this.cssClassBackground.setValue('background-image', this.imagePath);
+        this.cssClassBackground.active = true;
         this.imageClasses.forEach(c => c.active = false);
-        this.cssClassBackground.setBindingByName('background-image', 'Image1');
+        this.cssClassBackground.setBindingByName('background-image', '');
         break;
       case LayoutDesignerImagePosition.AdaptHeight:
         this.cssClassBackground.setValuesByList(this.cssClassBackgroundAdaptHeightProperties);
-        this.cssClassBackground.setValue('background-image', this.imageSrcBase64);
-        this.cssClassBackground.active = true;        
+        this.cssClassBackground.setValue('background-image', this.imagePath);
+        this.cssClassBackground.active = true;
         this.imageClasses.forEach(c => c.active = false);
-        this.cssClassBackground.setBindingByName('background-image', 'Image1');
+        this.cssClassBackground.setBindingByName('background-image', '');
         break;
       case LayoutDesignerImagePosition.Center:
-        this.cssClassBackground.setValue('background-image', '');
+        this.cssClassBackground.setValue('background-image', 'none');
+        this.simpleImageRef.src = this.bindingManager.replaceBindingsByValueInString(this.imagePath);
         this.htmlElementRef.appendChild(this.simpleImageBoxRef);
         this.cssClassBackground.active = false;
-        this.imageClasses.forEach(c => c.active = true)
+        this.imageClasses.forEach(c => c.active = true);
+        this.htmlElementRef.style.backgroundImage = '';
         break;
       default:
         break;
@@ -229,10 +267,33 @@ export class EditableImage extends TransformableObject {
   }
 
   setCssValue(valueName: string, value: string): void {
-    if(valueName === 'imagePosition'){
+    if (valueName === 'imagePosition') {
       this.setImagePosition(parseInt(value));
       return;
     }
     super.setCssValue(valueName, value);
+  }
+
+  uploadNewImageFile(): void {
+    this.fileManager.uploadFile().subscribe(path => {
+      this.imagePath = path;
+      this.setImagePosition(this.imagePosition);
+    })
+  }
+
+  setImagePath(path: string): void {
+    this.imagePath = path;
+    this.setImagePosition(this.imagePosition);
+  }
+
+  getHTML(): string {
+    let html = this.htmlElementRef.outerHTML;
+    this.fileManager.fileList.forEach(f => {
+      html = html.replace(f.src, f.path);
+    });
+    if(this.bindingManager.findBindingsInString(this.imagePath).length > 0){
+      html = html.replace(this.bindingManager.replaceBindingsByValueInString(this.imagePath), this.imagePath);
+    }
+    return html;
   }
 }

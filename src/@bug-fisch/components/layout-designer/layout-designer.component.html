@@ -2,8 +2,7 @@
 <div id="atled-layout-designer">
     <div fxLayout="row wrap">
         <atled-layout-designer-menu-top fxFlex="100" (onChange)="menuTopChanged()"
-            (cardDirectionChange)="cardDirectionChange()" (visibleChange)="visibleChange($event)"
-            [globalCssClasses]="globalCssClasses" [transformableObjects]="listOfTransformableObjects"
+            (cardDirectionChange)="cardDirectionChange()" (visibleChange)="visibleChange($event)" [transformableObjects]="listOfTransformableObjects"
             [idCard]="idCard" [defaultTextField]="defaultTextField" [selectedObject]="selectedObject"
             (disableLayoutDesinger)="disableLayoutDesinger($event)">
         </atled-layout-designer-menu-top>
@@ -29,8 +28,7 @@
         <div fxFlex="360px">
             <atled-layout-designer-menu-right (change)="menuRightChanged()"
                 (disableLayoutDesinger)="disableLayoutDesinger($event)" [cssMode]="true"
-                [selectedObject]="selectedObject" [currentCreationMode]="currentCreationMode" [disableAll]="disableAll"
-                [globalCssClasses]="globalCssClasses">
+                [selectedObject]="selectedObject" [currentCreationMode]="currentCreationMode" [disableAll]="disableAll">
             </atled-layout-designer-menu-right>
         </div>
     </div>

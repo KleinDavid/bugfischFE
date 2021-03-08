@@ -1,19 +1,20 @@
-import { DesignerBindingManger } from '../managers/designerBindingManager';
+import { DesignerBindingManager } from '../managers/designerBindingManager';
+import { DesignerFileManager, DesignerFileType } from '../managers/designerFileManager';
 
 export class CssClass {
     private factory = ValueFactory.getInstace();
     private styleSheet: HTMLStyleElement;
-    private bindingManger: DesignerBindingManger;
+    private bindingManger: DesignerBindingManager;
 
     active: boolean = true;
     isClassOfHtmlParent: boolean = true;
 
-    menuRightEditable: boolean = false;
+    menuRightEditable: boolean = true;
     valueList: CssClassValue[] = [];
     name: string = '';
 
     constructor(name = '') {
-        this.bindingManger = DesignerBindingManger.getInstance();
+        this.bindingManger = DesignerBindingManager.getInstance();
         this.name = name;
     }
 
@@ -35,17 +36,17 @@ export class CssClass {
     }
 
     delete() {
+        const parentNode = 
         this.styleSheet ? this.styleSheet.parentNode.removeChild(this.styleSheet) : '';
+        console.log()
+        console.log(this.styleSheet);
     }
 
     setValue(valueName: string, value: string = '', withFactory = true): void {
         let oldValue = this.valueList.find(v => v.valueName === valueName);
         if (oldValue) {
             value = value.replace(oldValue.preText, '').replace(oldValue.afterText, '');
-            if(valueName === 'background-image'){
-                console.log(value+oldValue.binding);
-            }
-            if(oldValue.binding === value){
+            if (oldValue.binding === value) {
                 return;
             }
             oldValue.value = oldValue.valueType === CssValueType.NUMBER ? (parseInt(value) | 0) + '' : value;;
@@ -90,6 +91,14 @@ export class CssClass {
         return this.bindingManger.replaceBindingsByValueInString('.' + this.name + '{' + valueString + '}');
     }
 
+    getCssStringWithBinding(): string {
+        let valueString = '';
+        this.valueList.forEach(v => {
+            valueString += v.getValueCssString() + '\n';
+        });
+        return '.' + this.name + '{' + valueString + '}';
+    }
+
     setValuesByValueString(valueString: string): void {
         this.valueList = [];
         let properies = valueString.replace(/\n\r?/g, '').split(';').filter(p => p.includes(':'));
@@ -107,7 +116,6 @@ export class CssClass {
                 }
                 counter++;
             });
-            console.log('+' + valueString + '+', value.split(' '));
             this.setValue(valueName, valueString);
         });
     }
@@ -116,7 +124,7 @@ export class CssClass {
         let newClass = new CssClass();
         Object.assign(newClass, JSON.parse(JSON.stringify(this)));
         newClass.factory = ValueFactory.getInstace();
-        newClass.bindingManger = DesignerBindingManger.getInstance();
+        newClass.bindingManger = DesignerBindingManager.getInstance();
         let valueList = [];
         this.valueList.forEach(v => {
             let newValue = new CssClassValue('');
@@ -129,14 +137,19 @@ export class CssClass {
 
     setBindingByName(valueName: string, binding: string): void {
         let value = this.valueList.find(v => v.valueName === valueName);
-        if(!value){
+        if (!value) {
             return;
         }
         value.binding = binding;
     }
+
+    blockValueByName(valueName: string): void {
+        // this.valueList.find(v => v.valueName === valueName).isBlocked = true;;
+    }
 }
 
 export class CssClassValue {
+    isBlocked = false;
     valueName: string;
     value: string = '';
     valueType: CssValueType = CssValueType.STRING;

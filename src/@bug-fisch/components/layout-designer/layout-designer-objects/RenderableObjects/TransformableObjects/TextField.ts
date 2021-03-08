@@ -1,14 +1,18 @@
 import { TransformableObject } from "../TransformableObject";
 import { Position } from '../../Position';
 import { CssClass } from '../../CssClass';
+import { DesignerBindingManager } from '../../../managers/designerBindingManager';
 
 export class TextField extends TransformableObject {
+    private bindingManager = DesignerBindingManager.getInstance();
+
     icon: string = 'title';
     type = 'TextField';
 
     backgroundColor = 'none';
     typeName = 'Text';
     text = '';
+    textWithoutBindings = '';
 
     cssClassStyleProperties = [
         { valueName: 'position', value: 'absolute' },
@@ -52,11 +56,10 @@ export class TextField extends TransformableObject {
 
         // html
         this.htmlElementRef = document.createElement('div');
-        this.htmlElementRef.id = this.id;
+        this.htmlElementRef.id = this.type + '-' + this.id;
         this.cssClassList.forEach(c => {
             this.htmlElementRef.classList.add(c.name);
         });
-        this.htmlElementRef.classList.add(this.type + '-' + this.id);
         this.tableCellDivRef = document.createElement('div');
         this.tableCellDivRef.style.wordWrap = 'break-word;';
         this.textareaElementRef = document.createElement('textarea');
@@ -69,6 +72,7 @@ export class TextField extends TransformableObject {
         this.cssClassPosition = new CssClass(this.type + '-' + this.id + '-position');
         this.cssClassPosition.menuRightEditable = true;
         this.htmlElementRef.classList.add(this.cssClassPosition.name);
+        this.cssClassList.push(this.cssClassPosition);
 
         let styleClass = new CssClass(this.type + '-' + this.id + '-style');
         styleClass.menuRightEditable = true;
@@ -78,20 +82,24 @@ export class TextField extends TransformableObject {
 
         let tableCellClass = new CssClass(this.type + '-' + this.id + '-cell');
         tableCellClass.setValuesByList(this.cssTableCellClass);
+        tableCellClass.isClassOfHtmlParent = false;
         this.cssClassList.push(tableCellClass)
         this.tableCellDivRef.classList.add(tableCellClass.name);
 
         let textStyleClass = new CssClass(this.type + '-' + this.id + '-text');
         textStyleClass.menuRightEditable = true;
+        textStyleClass.isClassOfHtmlParent = false;
         textStyleClass.setValuesByList(this.cssClassTextProperties);
         this.cssClassList.push(textStyleClass);
         this.tableCellDivRef.classList.add(textStyleClass.name);
         this.textareaElementRef.classList.add(textStyleClass.name);
 
         let staticClass = new CssClass(this.type + '-' + this.id + '-text-field-static');
+        staticClass.isClassOfHtmlParent = false;
         staticClass.setValuesByList(this.cssTextFieldStaticClass, false);
         this.cssClassList.push(staticClass)
         this.textareaElementRef.classList.add(staticClass.name);
+        staticClass.menuRightEditable = false;
     }
 
     create(): void {
@@ -107,6 +115,10 @@ export class TextField extends TransformableObject {
             return;
         }
         this.tableCellDivRef.innerHTML = '';
+        console.log((this.cssClassList.find(c => c.name === this.type + '-' + this.id + '-text')));
+        this.textareaElementRef.style.height =
+            (this.text.split('<br />').length * parseInt(this.cssClassList.find(c => c.name === this.type + '-' + this.id + '-text')
+                .getValueByName('line-height').value)) + 'px'
         this.tableCellDivRef.appendChild(this.textareaElementRef);
         super.select();
         this.render();
@@ -114,8 +126,12 @@ export class TextField extends TransformableObject {
 
     unselect(): void {
         super.unselect();
+        this.bindingManager.findAndSetBindingsInString(this.text).forEach(b => {
+            b.value = b.value === '' ? b.name : b.value;
+        });
+        this.textWithoutBindings = this.bindingManager.replaceBindingsByValueInString(this.text);
         if (this.tableCellDivRef) {
-            this.tableCellDivRef.innerHTML = this.text;
+            this.tableCellDivRef.innerHTML = this.textWithoutBindings;
         }
     }
 
@@ -157,5 +173,9 @@ export class TextField extends TransformableObject {
             }
         }
         return copyedObject;
+    }
+
+    getHTML(): string {
+        return this.htmlElementRef.outerHTML.replace(this.textWithoutBindings, this.text);
     }
 }

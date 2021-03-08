@@ -11,6 +11,15 @@
     flex: 1 1 auto;
   }
 
+  .menu-top-icon-small {
+    cursor: pointer;
+    text-align: center;
+    margin-top: 4px;
+    font-size: 30px;
+    width: 36px;
+    height: 36px;
+  }
+
   ::ng-deep .mat-tab-group {
     height: 100%;
     ::ng-deep .mat-tab-body-wrapper {
@@ -64,6 +73,14 @@
       }
     }
 
+    .table-hover-and-click {
+      cursor: pointer;
+    }
+
+    .table-hover-and-click:hover {
+      background-color: #dcdcdc;;
+    }
+
     .full-width {
       width: 100%;
     }
@@ -83,11 +100,6 @@
 
     .global-class-cell {
       border-bottom: 1px solid #c9c9c9;
-      cursor: pointer;
-    }
-
-    .global-class-cell:hover {
-      background-color: #dcdcdc;
     }
 
     .class-list {

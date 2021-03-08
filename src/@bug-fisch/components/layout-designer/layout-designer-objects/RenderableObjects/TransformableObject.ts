@@ -5,6 +5,7 @@ import { Position } from '../Position';
 import { Subject } from 'rxjs';
 import { Transformation } from '../Transformation';
 import { CssClass, CssClassValue } from '../CssClass';
+import { DesignerCssClassManager } from '../../managers/designerCssClassManager';
 
 export abstract class TransformableObject extends RenderableObject {
 
@@ -72,36 +73,6 @@ export abstract class TransformableObject extends RenderableObject {
       this.delete();
     }
     this.editMode = LayoutDesignerlEditMode.Move;
-  }
-
-  getHTML(): string {
-    let div = document.createElement('div');
-
-    div.style.position = 'absolute';
-
-    div.style.height = this.height + 'px';
-    div.style.width = this.width + 'px';
-    div.style.top = this.position.y + 'px';
-    div.style.left = this.position.x + 'px';
-    div.style.zIndex = this.zIndex + '';
-
-    div.style.borderRadius = this.borderRadius + 'px';
-    div.style.cursor = this.cursor;
-    div.style.backgroundColor = this.backgroundColor;
-    div.style.border = this.borderWidth + 'px ' + this.borderStyle + ' ' + this.borderColor;
-    div.id = this.id;
-
-    if (this.selected) {
-
-      this.createTransformRects();
-      let resString = div.outerHTML;
-
-      this.transformRects.forEach(rect => {
-        resString += rect.getHTML();
-      })
-      return resString;
-    }
-    return div.outerHTML;
   }
 
   select(): void {
@@ -369,7 +340,7 @@ export abstract class TransformableObject extends RenderableObject {
   updateClasses(): void {
     //this.htmlElementRef.className = '';
     let classString = ''
-    
+
     this.cssClassList.filter(c => c.isClassOfHtmlParent).forEach(c => {
       classString += c.name + ' '
     });
@@ -398,13 +369,13 @@ export abstract class TransformableObject extends RenderableObject {
 
   getCssValue(valueName: string): CssClassValue {
     for (let cssClass of this.cssClassList) {
-      if(cssClass.getValueByName(valueName)){
+      if (cssClass.getValueByName(valueName)) {
         return cssClass.getValueByName(valueName);
       }
     }
   }
 
-  protected createCssElement(id: string, propertyList: {valueName: string, value: string}[], htmlRefList: HTMLElement[], menuRightEditable: boolean = true, withFactory: boolean = true, isClassOfHtmlParent: boolean = true): CssClass {
+  protected createCssElement(id: string, propertyList: { valueName: string, value: string }[], htmlRefList: HTMLElement[], menuRightEditable: boolean = true, withFactory: boolean = true, isClassOfHtmlParent: boolean = true): CssClass {
     let cssClass = new CssClass(id);
     cssClass.menuRightEditable = menuRightEditable;
     cssClass.create();
@@ -414,6 +385,11 @@ export abstract class TransformableObject extends RenderableObject {
       e.classList.add(cssClass.name);
     });
     this.cssClassList.push(cssClass);
+    DesignerCssClassManager.getInstance().addBlockedClass(cssClass);
     return cssClass;
   }
+
+ getHTML(): string {
+   return this.htmlElementRef.outerHTML;
+ }
 }

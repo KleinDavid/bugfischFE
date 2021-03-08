@@ -4,12 +4,12 @@ import { TransformableObject } from './RenderableObjects/TransformableObject';
 import { CssClass } from './CssClass';
 
 export abstract class RenderableObject {
-  
+
   position: Position;
   width: number;
-  height: number; 
+  height: number;
   borderWidth: number = 0;
-  
+
   borderRadius: number = 0;
   borderColor: string = 'black';
   cursor: string = 'default';
@@ -17,7 +17,7 @@ export abstract class RenderableObject {
   borderStyle: string = 'solid';
   zIndex: number = 0;
   overflow: string = 'hidden';
-  
+
   id: string = '';
 
   protected parent: TransformableObject;
@@ -64,9 +64,12 @@ export abstract class RenderableObject {
   }
 
   delete(): void {
-    let elem = document.getElementById(this.id);
-    elem ? elem.parentNode.removeChild(elem) : '';
-    this.styleSheet ? this.styleSheet.parentNode.removeChild(this.styleSheet) : '';
+    let elem = this.htmlElementRef;
+    if (elem.parentNode) {
+      elem ? elem.parentNode.removeChild(elem) : '';
+      this.cssClassList.forEach(c => c.delete());
+    }
+    // this.styleSheet ? this.styleSheet.parentNode.removeChild(this.styleSheet) : '';
   }
 
   addChild(child: TransformableObject, absolute: boolean = false) {

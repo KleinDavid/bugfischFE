@@ -1,38 +1,19 @@
-.global-classes-dialog .mat-dialog-container {
-
-  min-width: 800px !important;
+.binding-dialog .mat-dialog-container {
+  min-width: 700px !important;
   height: auto;
   overflow: hidden;
 
-  .global-class-cell {
-    border-bottom: 1px solid #e5e5e5;
-    cursor: pointer;
-  }
-
-  .global-class-cell:hover {
-    background-color: #dcdcdc;
-  }
-  
-  .class-list{
-    margin-top: -20px;
-    z-index: 1;
-  }
-
-  .selectedClass {
-    background-color: #dcdcdc;
-  }
-
-  .border-left {
-    border-left: 1px solid #dcdcdc;
+  .modeler-content-left {
+    width: 500px;
   }
 
   .modeler-content-right {
-    width: 250px;
-    padding-left: 12px;
+    width: 700px;
 
-    .binding-form-field{
+    .binding-form-field {
       margin-top: 11px;
-      max-width: 100px;
+      max-width: 239px;
+      min-width: 239px;
     }
 
     .vertical-center-box {
@@ -45,6 +26,14 @@
         top: 50%;
         transform: translate(-50%, -50%);
       }
+    }
+
+    .hover-cell{
+      cursor: pointer;
+    }
+
+    .hover-cell:hover {
+      background-color: #dcdcdc;
     }
 
     .global-class-cell {
@@ -62,6 +51,14 @@
         height: 100%;
       }
     }
+
+    .menu-top-icon:hover {
+      background-color: #e5e5e5;
+    }
+  }
+
+  .full-width {
+    width: 100%;
   }
 }
 
@@ -72,6 +69,4 @@
     flex: 1 0 auto;
     min-height: initial;
   }
-
 }
-

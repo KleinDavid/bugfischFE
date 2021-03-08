@@ -1,9 +1,13 @@
 import { Component, Output, EventEmitter, OnInit, Input } from '@angular/core';
 import { LayoutDesignerlCreationMode, LayoutDesignerImagePosition } from '../../layout-designer-objects/Enums'; import { TransformableObject } from '../../layout-designer-objects/RenderableObjects/TransformableObject';
-import { Transformation } from '../../layout-designer-objects/Transformation';
 import { CssClass, CssClassValue, CssValueType } from '../../layout-designer-objects/CssClass';
 import { MatDialog } from '@angular/material/dialog';
 import { CSSDialog } from '../../dialogs/css-dialog/css-dialog.component';
+import { DesignerFileManager } from '../../managers/designerFileManager';
+import { EditableImage } from '../../layout-designer-objects/RenderableObjects/TransformableObjects/EditableImage';
+import { Binding, DesignerBindingManager } from '../../managers/designerBindingManager';
+import { BindingDialog } from '../../dialogs/binding-dialog/binding-dialog.component';
+import { DesignerCssClassManager } from '../../managers/designerCssClassManager';
 ;
 
 
@@ -18,12 +22,16 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
   @Input() selectedObject: TransformableObject;
   @Input() cssMode: boolean = false;
   @Input() disableAll: boolean = false;
-  @Input() globalCssClasses: CssClass[] = [];
 
   @Output() change: EventEmitter<any> = new EventEmitter();
   @Output() disableLayoutDesinger: EventEmitter<boolean> = new EventEmitter();
 
+  private bindingManager = DesignerBindingManager.getInstance();
+  private cssClassManager: DesignerCssClassManager = DesignerCssClassManager.getInstance();
+
   CssValueType = CssValueType;
+  fileManager = DesignerFileManager.getInstance();
+  classManager = DesignerCssClassManager.getInstance();
 
   colors: any = {};
   creationModes = LayoutDesignerlCreationMode;
@@ -31,13 +39,11 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
   selectDataLists = {};
   selectedClass = new CssClass();
 
-  constructor(private cssDialog: MatDialog) {
-    let testClass = new CssClass();
-    testClass.name = 'borderLeft';
-    // testClass.valueString = 'border-left: 1px solid black';
-    this.globalCssClasses.push(testClass);
-    testClass.create();
-  }
+  bindings: Binding[] = [];
+  filteredBindings: Binding[] = [];
+  imageSrc = '';
+
+  constructor(private dialogRef: MatDialog) {}
 
   ngOnInit(): void {
     this.colors['backgroundColor'] = '';
@@ -93,6 +99,7 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
 
   addCssClass(value: CssClass) {
     if (!this.selectedObject.cssClassList.includes(value)) {
+      console.log(value);
       this.selectedObject.addClass(value);
     }
     this.selectedClass = null;
@@ -105,7 +112,7 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
   editCssClass(cssClass: CssClass) {
     this.disableAll = true;
     this.disableLayoutDesinger.emit(true);
-    const dialogRef = this.cssDialog.open(CSSDialog, {
+    const dialogRef = this.dialogRef.open(CSSDialog, {
       panelClass: 'dialog',
       autoFocus: false,
       data: { cssClass: cssClass }
@@ -118,6 +125,7 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
       cssClass.valueList = cssClassNew.valueList;
       cssClass.update();
       this.selectedObject.updateClasses();
+      this.cssClassManager.updateClasses();
     });
   }
 
@@ -125,7 +133,7 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
     let cssClass = new CssClass();
     this.disableAll = true;
     this.disableLayoutDesinger.emit(true);
-    const dialogRef = this.cssDialog.open(CSSDialog, {
+    const dialogRef = this.dialogRef.open(CSSDialog, {
       panelClass: 'dialog',
       autoFocus: false,
       data: { cssClass: cssClass }
@@ -138,10 +146,26 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
       cssClass.valueList = cssClassNew.valueList;
       if (cssClassNew.name !== '') {
         this.selectedObject.addClass(cssClass);
-        this.globalCssClasses.push(cssClass);
+        this.classManager.addClass(cssClass);
         cssClass.create();
       }
+      this.cssClassManager.updateClasses();
     });
+  }
+
+  getImagePath(): string {
+    return (this.selectedObject as EditableImage).imagePath;
+  }
+
+  uploadImageFile(): void {
+    this.bindingManager.startEditingBindings(this.getImagePath());
+    this.bindingManager.endEditingBindings('');
+    (this.selectedObject as EditableImage).uploadNewImageFile();
+  }
+
+  setImagePath(path: string): void {
+    (this.selectedObject as EditableImage).setImagePath(path);
+    this.bindingManager.endEditingBindings(path);
   }
 
   getHalfPropertyClass(valueName: string): string {
@@ -153,7 +177,46 @@ export class LayoutDesignerMenuRightComponent implements OnInit {
     return halfProps.indexOf(prop) % 2 === 0 ? 'padding-right' : 'padding-left';
   }
 
-  getActiveClasses(): CssClass[]{
-    return this.selectedObject.cssClassList.filter(c => c.active);
+  checkEnterPressImageSrc(keyCode: string, value: string): void {
+    if (keyCode === 'Enter') {
+      this.setImagePath(value);
+    }
+  }
+
+  getActiveClasses(): CssClass[] {
+    return this.selectedObject.cssClassList.filter(c => c.active && c.menuRightEditable);
+  }
+
+  findBindingsInString(bindingString: string): void {
+    this.bindings = this.bindingManager.findAndSetBindingsInString(bindingString, true);
+  }
+
+  filterBindingsByName(value: string): void {
+    this.filteredBindings = this.bindings.filter(b => b.name === value);
+  }
+
+  setBindingValue(name: string, value: string) {
+    this.bindingManager.setBindingValue(name, value);
+  }
+
+  onFocusSrcInput(value: string): void {
+    this.bindingManager.startEditingBindings(value);
+  }
+
+  openBindingDialog(binding: Binding) {
+    this.disableAll = true;
+    this.disableLayoutDesinger.emit(true);
+    const dialogRef = this.dialogRef.open(BindingDialog, {
+      panelClass: 'binding-dialog',
+      autoFocus: false,
+      data: { filterValue: binding.name }
+    });
+
+    dialogRef.afterClosed().subscribe((res: any) => {
+      
+      this.cssClassManager.updateClasses();
+      this.setImagePath(this.getImagePath());
+      this.disableLayoutDesinger.emit(false);
+    });
   }
 }

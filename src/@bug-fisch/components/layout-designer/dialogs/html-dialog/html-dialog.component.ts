@@ -4,9 +4,11 @@ import * as xmlFormatter from 'xml-formatter';
 import * as cleaner from 'clean-html';
 
 import * as pretty from 'pretty';
-import { IdCard } from '../layout-designer-objects/RenderableObjects/IdCard';
-import { TransformableObject } from '../layout-designer-objects/RenderableObjects/TransformableObject';
-import { CssClass } from '../layout-designer-objects/CssClass';
+import { DesignerFileManager } from '../../managers/designerFileManager';
+import { DesignerCssClassManager } from '../../managers/designerCssClassManager';
+import { IdCard } from '../../layout-designer-objects/RenderableObjects/IdCard';
+import { CssClass } from '../../layout-designer-objects/CssClass';
+import { TransformableObject } from '../../layout-designer-objects/RenderableObjects/TransformableObject';
 
 @Component({
     selector: 'workflow-html-dialog.component',
@@ -24,6 +26,9 @@ export class HTMLDialog implements OnInit, AfterViewChecked, OnDestroy {
     xmlContentEditor: String = '';
     xmlFormatter = xmlFormatter;
     xmlLineNumbers: number[] = [];
+
+    private cssManager: DesignerCssClassManager = DesignerCssClassManager.getInstance();
+    private fileManager: DesignerFileManager = DesignerFileManager.getInstance();
 
     // edit or upload
     workState: String = '';
@@ -52,9 +57,8 @@ export class HTMLDialog implements OnInit, AfterViewChecked, OnDestroy {
         let style = document.createElement('style');
         transformableObjects.forEach(t => { style.innerHTML += t.getCss() });
         // cssClasses.forEach(t => { style.innerHTML += t.getCss() })
-        console.log(style.outerHTML);
 
-        let u = '<html lang="de"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Print-Layout | FDG-DUS | FDG-Dienst</title>' + style.outerHTML + '<style>.simple-image-box {overflow: hidden;width: 100%;height: 100%;  position: relative;}.simple-image {position: absolute;max-width: 100%;max-height: 100%;top: 0;bottom: 0;left: 0;right: 0;margin: auto;-webkit-user-select: none;-khtml-user-select: none;-moz-user-select: none;-o-user-select: none;user-select: none;}:host {display: block;left: 0;width: 100%;height: 100%;}</style></head><body>' + idCard.getFinalHTML() + '</body></html>'
+        let u = '<html lang="de"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><title>Print-Layout | FDG-DUS | FDG-Dienst</title></html>'
         let html = document.createElement('html')
         html.innerHTML = u;
         let str = html.outerHTML;
@@ -65,9 +69,45 @@ export class HTMLDialog implements OnInit, AfterViewChecked, OnDestroy {
             console.log(html);
         });
 
-        this.xmlContent = str;
+        this.xmlContent = this.createHtml();
         // this.formatXml();
         this.updateXmlLineNumbers();
+        this.createHtml();
+    }
+
+    createHtml(): string {
+        let html = document.createElement('html');
+        html.lang = 'de';
+        let head = document.createElement('head');
+        
+        let meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'width=device-width, initial-scale=1.0';
+        meta.setAttribute('charset', 'utf-8');
+        
+        let style = document.createElement('style');
+        let hostClassString = ':host {display: block;left: 0;width: 100%;height: 100%;}'
+        let styleString = hostClassString;
+        this.cssManager.classes.concat(this.cssManager.blockedClasses).filter(c => c.active).forEach(c => {
+            styleString += c.getCssStringWithBinding();
+        })
+        style.innerHTML = styleString;
+
+        let body = document.createElement('body');
+        body.innerHTML = (this.data.idCard as IdCard).getFinalHTML();
+
+        head.appendChild(meta);
+        head.appendChild(style);
+
+        html.appendChild(head);
+        html.appendChild(body);
+
+        let outerHtml = html.outerHTML;
+        // this.fileManager.fileList.forEach(f => {
+        //     outerHtml = outerHtml.replace(f.src, f.path);
+        // });
+
+        return pretty(outerHtml);
     }
 
     ngAfterViewChecked(): void {

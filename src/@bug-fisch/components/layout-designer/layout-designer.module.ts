@@ -13,11 +13,13 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatIconModule } from '@angular/material/icon';
 import { LayoutDesignerMenuModule } from './layout-designer-menu/layout-designer-menu.module';
 import { LayoutDesignerComponent } from './layout-designer.component';
-import { HTMLDialog } from './html-dialog/html-dialog.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { CSSDialog } from './dialogs/css-dialog/css-dialog.component';
 import { FormsModule } from '@angular/forms';
 import { CSSGlobalDialog } from './dialogs/css-global-dialog/css-global-dialog.component';
+import { BindingDialog } from './dialogs/binding-dialog/binding-dialog.component';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
+import { HTMLDialog } from './dialogs/html-dialog/html-dialog.component';
 
 @NgModule({
     imports: [
@@ -33,6 +35,7 @@ import { CSSGlobalDialog } from './dialogs/css-global-dialog/css-global-dialog.c
         LayoutDesignerMenuModule,
         FormsModule,
         MatButtonModule,
+        MatSelectModule,
 
         MatFormFieldModule,
         BugFischSharedModule,
@@ -43,14 +46,16 @@ import { CSSGlobalDialog } from './dialogs/css-global-dialog/css-global-dialog.c
         LayoutDesignerComponent,
         HTMLDialog,
         CSSDialog,
-        CSSGlobalDialog
+        CSSGlobalDialog,
+        BindingDialog
     ],
     exports: [
         LayoutDesignerComponent,
         LayoutDesignerMenuModule,
         HTMLDialog,
         CSSDialog,
-        CSSGlobalDialog
+        CSSGlobalDialog,
+        BindingDialog
     ]
 })
 

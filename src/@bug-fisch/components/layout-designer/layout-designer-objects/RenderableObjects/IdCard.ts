@@ -97,18 +97,29 @@ export class IdCard extends TransformableObject implements ZoomableObject {
     this.position.y = 0;
     this.childList.forEach(c => {
       c.unselect();
-    })
+    });
+    this.childList = this.childList.filter(c => !c.deleteState)
     let oldOverflow = this.overflow;
     this.overflow = 'hidden';
     this.render();
-  
-    let result = this.htmlElementRef.outerHTML;
+
+
+    console.log(this.htmlElementRef);
+    let htmlRes = this.htmlElementRef;
+    htmlRes.innerHTML = '';
+    let innerHTML = '';
+    this.childList.forEach(c => {
+      innerHTML += c.getHTML();
+    });
+    htmlRes.innerHTML = innerHTML;
+    
+    
     if (selectedObject) { selectedObject.select() }
     this.overflow = oldOverflow;
     this.position.x = x;
     this.position.y = y;
     this.render();
-    return result;
+    return htmlRes.outerHTML;
   }
 
   zoom(factor: number, center: Position = this.getRelativeCenter()): void {

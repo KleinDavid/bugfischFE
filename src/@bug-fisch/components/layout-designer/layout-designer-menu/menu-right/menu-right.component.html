@@ -11,7 +11,8 @@
             <div class="menu-properties menu-right-inner" fxFlex>
                 <ng-container>
                     <div fxLayout="column" style="padding-bottom: 12px; padding-top: 6px">
-                        <div *ngIf="selectedObject?.type === 'EditableImage'" style="padding-bottom: 12px; margin-top: -3px">
+                        <div *ngIf="selectedObject?.type === 'EditableImage'"
+                            style="padding-bottom: 12px; margin-top: -3px">
                             <mat-radio-group (change)="setValue('imagePosition', $event.value)"
                                 [value]="getValue('imagePosition')" aria-label="Select an option">
                                 <div fxLayout="column">
@@ -42,7 +43,7 @@
                                         <mat-label>{{value.valueName}}</mat-label>
                                         <input type="number" [min]="value.minValue" [max]="value.maxValue"
                                             autocomplete="off" matInput [placeholder]="value.valueName"
-                                             [value]="value.value"
+                                            [value]="value.value"
                                             (focusout)="setValue(value.valueName, $event.target.value)"
                                             (keyup)="checkEnterPress($event.code, value.valueName, $event.target.value)">
                                     </mat-form-field>
@@ -51,7 +52,7 @@
                                     <mat-form-field style="width: 100%">
                                         <mat-label>{{value.valueName}}</mat-label>
                                         <input autocomplete="off" matInput [placeholder]="value.valueName"
-                                             [value]="value.value"
+                                            [value]="value.value"
                                             (focusout)="setValue(value.valueName, $event.target.value)"
                                             (keyup)="checkEnterPress($event.code, value.valueName, $event.target.value)">
                                     </mat-form-field>
@@ -62,10 +63,10 @@
                                             <!--(colorPickerClose)="setValue(valueName, colors[valueName])"-->
                                             <mat-form-field style="width: 100%">
                                                 <mat-label>{{value.valueName}}</mat-label>
-                                                <input matInput [colorPicker]="value.value"
-                                                    [cpDisableInput]="false" [cpAlphaChannel]="'disabled'"
-                                                    [cpOutputFormat]="'hex'" [cpFallbackColor]="'#111111'"
-                                                    [cpPosition]="'bottom'" [cpDialogDisplay]="" [cpWidth]="'294px'"
+                                                <input matInput [colorPicker]="value.value" [cpDisableInput]="false"
+                                                    [cpAlphaChannel]="'disabled'" [cpOutputFormat]="'hex'"
+                                                    [cpFallbackColor]="'#111111'" [cpPosition]="'bottom'"
+                                                    [cpDialogDisplay]="" [cpWidth]="'294px'"
                                                     [cpCloseClickOutside]="true" [cpSaveClickOutside]="true"
                                                     [value]="value.value"
                                                     (colorPickerChange)=" colorChanged(value.valueName, $event)"
@@ -94,8 +95,7 @@
                                         <mat-form-field style="width: 100%">
                                             <mat-label>{{value.valueName}}</mat-label>
                                             <input type="text" autocomplete="off" matInput
-                                                [placeholder]="value.valueName"
-                                                [value]="value.value"
+                                                [placeholder]="value.valueName" [value]="value.value"
                                                 (focusout)="setValue(value.valueName, $event.target.value)"
                                                 (keyup)="checkEnterPress($event.code, value.valueName, $event.target.value)">
                                             <mat-select (selectionChange)="setValue(value.valueName, $event.value)">
@@ -121,7 +121,7 @@
                                 <mat-label>Class</mat-label>
                                 <mat-select fxFlex [(ngModel)]="selectedClass"
                                     (selectionChange)="addCssClass($event.value)">
-                                    <mat-option *ngFor="let data of globalCssClasses" [value]="data">
+                                    <mat-option *ngFor="let data of classManager.classes" [value]="data">
                                         {{data.name}}
                                     </mat-option>
                                 </mat-select>
@@ -131,7 +131,7 @@
                             </div>
                         </div>
                         <div fxFlex fxLayout="column" class="class-list">
-                            <div *ngFor="let class of getActiveClasses()" class="global-class-cell vertical-center-box"
+                            <div *ngFor="let class of getActiveClasses()" class="global-class-cell vertical-center-box table-hover-and-click"
                                 (click)="editCssClass(class)" fxFlex="36px">
                                 <div class="vertical-center">
                                     <div fxLayout="row" class="full-width">
@@ -155,20 +155,70 @@
             </div>
         </mat-tab>
         <mat-tab label="Src" *ngIf="selectedObject?.type === 'EditableImage'">
-            <div class="menu-properties menu-right-inner" fxFlex>
-                <div class="inputAndSelect">
-                    <!--<mat-form-field style="width: 100%">
-                        <mat-label>Src</mat-label>
-                        <input type="text" autocomplete="off" matInput placeholder="Src"
-                            (input)="setInput()" [value]="value.value"
-                            (focusout)="setValue(value.valueName, $event.target.value)"
-                            (keyup)="checkEnterPress($event.code, value.valueName, $event.target.value)">
-                        <mat-select (selectionChange)="setValue(value.valueName, $event.value)">
-                            <mat-option *ngFor="let data of value.selectProperties" [value]="data">
-                                {{data}}
-                            </mat-option>
-                        </mat-select>
-                    </mat-form-field>-->
+            <div class="menu-properties menu-right-inner" fxLayout="column">
+                <div fxFlex fxLayout="row">
+                    <div class="inputAndSelect" fxFlex>
+                        <mat-form-field style="width: 100%">
+                            <mat-label>Src</mat-label>
+                            <input (focus)="onFocusSrcInput($event.target.value)" type="text" autocomplete="off" matInput placeholder="Src" [value]="getImagePath()"
+                                (focusout)="setImagePath($event.target.value)"
+                                (keyup)="checkEnterPressImageSrc($event.code, $event.target.value); findBindingsInString($event.target.value)">
+                            <mat-select (selectionChange)="setImagePath($event.value)">
+                                <mat-option *ngFor="let data of fileManager.getAllImageFiles()" [value]="data.path">
+                                    {{data.name}}
+                                </mat-option>
+                            </mat-select>
+                        </mat-form-field>
+                    </div>
+                    <div fxFlex="36px">
+                        <div class="menu-top-icon">
+                            <mat-icon class="menu-top-icon-small" (click)="uploadImageFile()" fxFlex
+                                [ngClass]="'menu-left-icon-active'">folder_open</mat-icon>
+                        </div>
+                    </div>
+                </div>
+                <div fxFlex *ngIf="bindings.length > 0" class="modeler-content-right" fxLayout="column">
+                    <div class="global-class-cell vertical-center-box" fxFlex="36px" style="margin-top: -20px">
+                        <div class="vertical-center">
+                            <div fxLayout="row" class="full-width">
+                                <div fxFlex>
+                                    <div class="table">
+                                        <div class="table-cell"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="global-class-cell vertical-center-box" fxFlex="36px" >
+                        <div class="vertical-center">
+                            <div fxLayout="row" class="full-width">
+                                <div fxFlex>
+                                    <div class="table">
+                                        <div class="table-cell">Bindings</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div *ngFor="let binding of bindings" class="global-class-cell vertical-center-box table-hover-and-click"
+                        fxFlex="36px">
+                        <div class="vertical-center" (click)="openBindingDialog(binding)">
+                            <div fxLayout="row" class="full-width">
+                                <div fxFlex style="overflow: hidden;">
+                                    <div class="table">
+                                        <div class="table-cell">{{binding.name}}</div>
+                                    </div>
+                                </div>
+                                <div fxFlex="36px">
+                                    <div class="table">
+                                        <div class="table-cell">
+                                            <mat-icon>edit</mat-icon>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </mat-tab>
