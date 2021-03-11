@@ -14,12 +14,10 @@ export enum WebsocketConnectionState {
 export class WebsocketService {
     private websocketList: Websocket[] = [];
 
-    getNewWebsocket(name?: string): Websocket {
+    getNewWebsocket(name?: string, saveMassages?: boolean): Websocket {
         let websocket: Websocket;
         if (name) {
-            websocket = new Websocket(name);
-        } else {
-            websocket = new Websocket();
+            websocket = new Websocket(name, saveMassages);
         }
         this.registerWebsocket(websocket);
         return websocket;
@@ -56,7 +54,17 @@ export class WebsocketService {
 
 export class Websocket {
 
-    connectionState: WebsocketConnectionState;
+    set connectionState(connectionState: WebsocketConnectionState) {
+        if(connectionState !== this._connectionState){
+            this._connectionState = connectionState;
+            this.subjectConnectionState.next(connectionState);
+        } 
+    }
+    get connectionState(): WebsocketConnectionState {
+        return this._connectionState;
+    }
+    private _connectionState: WebsocketConnectionState;
+    
     id: number;
     messages: WebsocketMessage[] = [];
     name: string;
@@ -71,11 +79,14 @@ export class Websocket {
     private subjectMessagesSend: Subject<WebsocketMessage>;
     private subjectMessagesReceive: Subject<WebsocketMessage>;
     private subjectMessages: Subject<WebsocketMessage>;
+    private subjectConnectionState: Subject<WebsocketConnectionState>;
 
-    constructor(name?: string) {
+    constructor(name?: string, saveMessages?: boolean) {
         this.subjectMessages = new Subject<WebsocketMessage>();
         this.subjectMessagesSend = new Subject<WebsocketMessage>();
         this.subjectMessagesReceive = new Subject<WebsocketMessage>();
+        this.subjectConnectionState = new Subject<WebsocketConnectionState>();
+        this.saveMassages = saveMessages;
 
         if (name) {
             this.name = name;
@@ -83,7 +94,7 @@ export class Websocket {
         this.connectionState = WebsocketConnectionState.notConnected;
     }
 
-    connect(url: string, onMessage?: any): void {
+    async connect(url: string, onMessage?: any): Promise<void> {
         this.connectionState = WebsocketConnectionState.waiting;
 
         this.url = url;
@@ -94,6 +105,13 @@ export class Websocket {
 
         this.connectWebsocket();
         this.subscription = this.subjectWebsocket.subscribe();
+        return new Promise((resolve, reject) => {
+            this.subjectConnectionState.subscribe(res => { 
+                if(res === WebsocketConnectionState.connected){
+                    resolve(); 
+                }    
+            });
+        });
     }
 
     sendRequest(messageString: string) {
@@ -118,6 +136,10 @@ export class Websocket {
 
     getSubjectMessages(): Subject<WebsocketMessage> {
         return this.subjectMessages;
+    }
+
+    getSubjectConnection(): Subject<WebsocketConnectionState> {
+        return this.subjectConnectionState;
     }
 
     destroy(): void {
@@ -167,6 +189,7 @@ export class Websocket {
                 )
             );
         } catch (e) {
+            console.log(e);
             this.connectionState = WebsocketConnectionState.notConnected;
         }
     }
@@ -183,6 +206,7 @@ export class Websocket {
                 };
                 ws.onopen = () => {
                     this.connectionState = WebsocketConnectionState.connected;
+
                 };
                 return ws.close.bind(ws);
             }

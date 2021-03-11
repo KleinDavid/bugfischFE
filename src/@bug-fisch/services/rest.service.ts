@@ -1,7 +1,7 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import 'rxjs';
-import { Observable, throwError as observableThrowError } from 'rxjs';
+import { Observable, Subject, throwError as observableThrowError } from 'rxjs';
 import { catchError, timeout } from 'rxjs/operators';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/observable/of';
@@ -10,14 +10,21 @@ import 'rxjs/add/operator/retry';
 import { DataService } from './data.service';
 import { Action } from '../model/action.model';
 import { ServerResult } from '../model/serverResult.model';
+import { Websocket, WebsocketConnectionState, WebsocketService } from './websocket.service';
+import { WebsocketMessage } from '../model/websocketMessage.model';
 
 @Injectable()
 export class RestService {
     // baseUrl = 'http://davidjugend.pythonanywhere.com/';
     baseUrl = 'http://localhost:8000/'
     // baseUrl = 'http://185.26.156.206:40403/'
+    websocket: Websocket;
+    private websocketMessageObservable: Subject<WebsocketMessage>
 
-    constructor(private _http: HttpClient, private dataService: DataService) { }
+    constructor(private _http: HttpClient, private dataService: DataService, private websocketService: WebsocketService) {
+        this.websocket = this.websocketService.getNewWebsocket('MainConnection');
+        this.websocketMessageObservable = this.websocket.getSubjectMessagesReceive();
+    }
 
     public postRequest<T>(path: string, body: any, headers: HttpHeaders = null, params: HttpParams = null): Observable<T> {
         body = { data: body }
@@ -63,8 +70,16 @@ export class RestService {
             );
     }
 
-    public executeAction(action: Action): Observable<ServerResult> {
+    public async executeAction(action: Action): Promise<ServerResult> {
         action.Token = localStorage.getItem('Token');
-        return this.postRequest<ServerResult>('executeAction/', action)
+        if (this.websocket.connectionState !== WebsocketConnectionState.connected) {
+            await this.websocket.connect('ws://localhost:1111');
+        }
+        this.websocket.sendRequest(JSON.stringify({ data: action }));
+        return new Promise((resolve, reject) => {
+            this.websocketMessageObservable.subscribe(res => {
+                resolve(JSON.parse(res.Message));
+            });
+        });
     }
 }

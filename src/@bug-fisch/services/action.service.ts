@@ -13,31 +13,30 @@ export class ActionService {
     actions: Action[] = [];
     websocket: Websocket;
 
-    constructor(private _rest: RestService, private dataService: DataService, private websocketService: WebsocketService) {
-        this.websocket = this.websocketService.getNewWebsocket()
+    constructor(private _rest: RestService, private dataService: DataService) {
+
     }
 
-    public executeAction(action: Action) {
-        this._rest.executeAction(action).subscribe(res => {
-            if (res.Error != ''){
-                console.error(res.Error)
-                return
-            }
-            if (this.actionExecutedSubjects.find(actionExecutedSubject => action.Name === actionExecutedSubject.name)) {
-                this.actionExecutedSubjects.find(actionExecutedSubject => action.Name === actionExecutedSubject.name).actionExecutedSubject.next(true)
-            }
-            let serverActions = res.Actions.filter(action => {
-                return action.Execute === 'Server'
-            });
-            this.setNewActionsAfterResult(res.ActionIds, serverActions)
-
-            let clientActions = res.Actions.filter(action => {
-                return action.Execute === 'Client'
-            });
-            clientActions.forEach(action => {
-                this.handleAction(action)
-            })
+    public async executeAction(action: Action) {
+        const res = await this._rest.executeAction(action);
+        if (res.Error != '') {
+            console.error(res.Error)
+            return
+        }
+        if (this.actionExecutedSubjects.find(actionExecutedSubject => action.Name === actionExecutedSubject.name)) {
+            this.actionExecutedSubjects.find(actionExecutedSubject => action.Name === actionExecutedSubject.name).actionExecutedSubject.next(true)
+        }
+        let serverActions = res.Actions.filter(action => {
+            return action.Execute === 'Server'
         });
+        this.setNewActionsAfterResult(res.ActionIds, serverActions)
+
+        let clientActions = res.Actions.filter(action => {
+            return action.Execute === 'Client'
+        });
+        clientActions.forEach(action => {
+            this.handleAction(action)
+        })
     }
 
     private setNewActionsAfterResult(actionIds: string[], serverActions: Action[]) {
