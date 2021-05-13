@@ -3,7 +3,9 @@ import { RestService } from './rest.service';
 import { DataService } from './data.service';
 import { Subject } from 'rxjs';
 import { Action } from '../model/action.model';
-import { Websocket, WebsocketService } from './websocket.service';
+import { Websocket, WebsocketConnectionState, WebsocketService } from './websocket.service';
+import { WebsocketMessage } from '../model/websocketMessage.model';
+import { ServerResult } from '../model/serverResult.model';
 
 @Injectable()
 export class ActionService {
@@ -13,30 +15,58 @@ export class ActionService {
     actions: Action[] = [];
     websocket: Websocket;
 
-    constructor(private _rest: RestService, private dataService: DataService) {
-
+    constructor(private dataService: DataService, private websocketService: WebsocketService) {
+        this.initWebsocket();
     }
 
     public async executeAction(action: Action) {
-        const res = await this._rest.executeAction(action);
-        if (res.Error != '') {
-            console.error(res.Error)
-            return
+        action.Token = localStorage.getItem('Token');
+        if (this.websocket.connectionState !== WebsocketConnectionState.connected) {
+            await this.websocket.connect('ws://185.26.156.206:40406');
         }
-        if (this.actionExecutedSubjects.find(actionExecutedSubject => action.Name === actionExecutedSubject.name)) {
-            this.actionExecutedSubjects.find(actionExecutedSubject => action.Name === actionExecutedSubject.name).actionExecutedSubject.next(true)
-        }
-        let serverActions = res.Actions.filter(action => {
-            return action.Execute === 'Server'
-        });
-        this.setNewActionsAfterResult(res.ActionIds, serverActions)
+        this.websocket.sendRequest(JSON.stringify({ data: action }));
+        // const res = await this._rest.executeAction(action);
+        // if (res.Error != '') {
+        //     console.error(res.Error)
+        //     return
+        // }
+        // if (this.actionExecutedSubjects.find(actionExecutedSubject => action.Name === actionExecutedSubject.name)) {
+        //     this.actionExecutedSubjects.find(actionExecutedSubject => action.Name === actionExecutedSubject.name).actionExecutedSubject.next(true)
+        // }
+        // let serverActions = res.Actions.filter(action => {
+        //     return action.Execute === 'Server'
+        // });
+        // this.setNewActionsAfterResult(res.ActionIds, serverActions)
 
-        let clientActions = res.Actions.filter(action => {
-            return action.Execute === 'Client'
+        // let clientActions = res.Actions.filter(action => {
+        //     return action.Execute === 'Client'
+        // });
+        // clientActions.forEach(action => {
+        //     this.handleAction(action)
+        // })
+    }
+
+    private initWebsocket(): void {
+        this.websocket = this.websocketService.getNewWebsocket('MainConnection');
+        this.websocket.getSubjectMessagesReceive().subscribe(serverResult => {
+            const res = JSON.parse(serverResult.Message) as ServerResult;
+            if (res.Error != '') {
+                console.error(res.Error)
+                return
+            }
+            this.actionExecutedSubjects.find(actionExecutedSubject => res.ExecutedActionName === actionExecutedSubject.name)?.actionExecutedSubject.next(true)
+            let serverActions = res.Actions.filter(action => {
+                return action.Execute === 'Server'
+            });
+            this.setNewActionsAfterResult(res.ActionIds, serverActions)
+
+            let clientActions = res.Actions.filter(action => {
+                return action.Execute === 'Client'
+            });
+            clientActions.forEach(action => {
+                this.handleAction(action)
+            })
         });
-        clientActions.forEach(action => {
-            this.handleAction(action)
-        })
     }
 
     private setNewActionsAfterResult(actionIds: string[], serverActions: Action[]) {
@@ -49,7 +79,7 @@ export class ActionService {
             if (oldAction) {
                 oldAction = action;
             } else {
-                this.actionExecutedSubjects.push(new ActionExecutedSubject(action.Name));
+                this.actionExecutedSubjects.push(new ActionExecutedSubject(action.Name, action.Id));
                 currentActions.push(action);
             }
         });
@@ -78,7 +108,7 @@ export class ActionService {
 
     private getActionBinding(binding: string): string {
         let name = binding.split('.')[1];
-        let object = this.actions.find(a => a.Name === name).Input
+        let object = this.actions.find(a => a.Name === name).Input;
         for (let counter = 2; counter < binding.split('.').length; counter++) {
             object = object[binding.split('.')[counter]];
         }
@@ -140,16 +170,16 @@ export class ActionService {
     }
 
     getActionExecutedSubjectByName(name: string) {
-
         return this.actionExecutedSubjects.find(action => action.name === name)
     }
 }
 
 class ActionExecutedSubject {
-    name = ''
+    name = '';
+    id = '';
     actionExecutedSubject: Subject<boolean> = new Subject<boolean>();
 
-    constructor(name: string) {
+    constructor(name: string, id: string) {
         this.name = name
     }
 }

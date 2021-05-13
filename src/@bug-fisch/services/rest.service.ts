@@ -18,6 +18,7 @@ export class RestService {
     // baseUrl = 'http://davidjugend.pythonanywhere.com/';
     baseUrl = 'http://localhost:8000/'
     // baseUrl = 'http://185.26.156.206:40403/'
+    websocketUrl = 'ws://185.26.156.206:40406';
     websocket: Websocket;
     private websocketMessageObservable: Subject<WebsocketMessage>
 
@@ -73,7 +74,7 @@ export class RestService {
     public async executeAction(action: Action): Promise<ServerResult> {
         action.Token = localStorage.getItem('Token');
         if (this.websocket.connectionState !== WebsocketConnectionState.connected) {
-            await this.websocket.connect('ws://localhost:1111');
+            await this.websocket.connect(this.websocketUrl);
         }
         this.websocket.sendRequest(JSON.stringify({ data: action }));
         return new Promise((resolve, reject) => {
