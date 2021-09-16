@@ -22,16 +22,6 @@
     height: 100%;
     position: relative;
 
-    #atled-layout-designer-chipcard {
-      border: 3px dotted black;
-      border-radius: calc(height/4px);
-      position: relative;
-      left: 50%;
-      top: 50%;
-      -webkit-transform: translate(-50%, -50%);
-      transform: translate(-50%, -50%);
-    }
-
     .noDragElement {
       position: absolute;
       width: 100%;

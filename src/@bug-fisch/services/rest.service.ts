@@ -14,8 +14,8 @@ import { ServerResult } from '../model/serverResult.model';
 @Injectable()
 export class RestService {
     // baseUrl = 'http://davidjugend.pythonanywhere.com/';
-    baseUrl = 'http://localhost:8000/'
-    // baseUrl = 'http://185.26.156.206:40403/'
+    // baseUrl = 'http://localhost:8000/'
+    baseUrl = 'http://185.26.156.206:40400/'
 
     constructor(private _http: HttpClient, private dataService: DataService) { }
 
