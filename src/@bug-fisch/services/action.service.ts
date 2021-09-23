@@ -6,6 +6,7 @@ import { Action } from '../model/action.model';
 import { Websocket, WebsocketConnectionState, WebsocketService } from './websocket.service';
 import { WebsocketMessage } from '../model/websocketMessage.model';
 import { ServerResult } from '../model/serverResult.model';
+import { ConfigService } from './config.service';
 
 @Injectable()
 export class ActionService {
@@ -15,14 +16,15 @@ export class ActionService {
     actions: Action[] = [];
     websocket: Websocket;
 
-    constructor(private dataService: DataService, private websocketService: WebsocketService) {
+    constructor(private dataService: DataService, private websocketService: WebsocketService, 
+        private configService: ConfigService) {
         this.initWebsocket();
     }
 
     public async executeAction(action: Action) {
         action.Token = localStorage.getItem('Token');
         if (this.websocket.connectionState !== WebsocketConnectionState.connected) {
-            await this.websocket.connect('ws://localhost:1111');
+            await this.websocket.connect(this.configService.config.websocketUrl);
         }
         this.websocket.sendRequest(JSON.stringify({ data: action }));
         // const res = await this._rest.executeAction(action);

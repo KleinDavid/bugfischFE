@@ -1,5 +1,5 @@
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -14,34 +14,19 @@ import { DynamicPageModule } from 'src/@bug-fisch/apps/app-client/pages/dynamic-
 import { ActionService } from 'src/@bug-fisch/services/action.service';
 import { DataService } from 'src/@bug-fisch/services/data.service';
 import { RestService } from 'src/@bug-fisch/services/rest.service';
-
-const appRoutes: Routes = [
-  {
-    path: 'startt',
-    component: DynamicPageComponent,
-    data: { title: 'Heroes List' }
-  },
-  { path: '',
-    redirectTo: '/startt',
-    pathMatch: 'full'
-  }
-];
+import { ConfigService } from 'src/@bug-fisch/services/config.service';
 
 @NgModule({
   declarations: [
     AppComponent,
   ],
   imports: [
-    RouterModule.forRoot(
-      appRoutes,
-      { enableTracing: true } // <-- debugging purposes only
-    ),
     DynamicPageModule,
     BrowserModule,
     CommonModule,
     HttpClientModule,
     AppRoutingModule,
-    BrowserAnimationsModule, 
+    BrowserAnimationsModule,
   ],
   providers: [
     {
@@ -51,8 +36,14 @@ const appRoutes: Routes = [
     },
     ActionService,
     DataService,
-    RestService
+    RestService,
+    ConfigService,
+    { provide: APP_INITIALIZER, useFactory: ConfigServiceFactory, deps: [ConfigService], multi: true }
   ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
+
+export function ConfigServiceFactory(configService: ConfigService) {
+  return () => configService.loadConfig();
+}
