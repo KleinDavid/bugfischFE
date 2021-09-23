@@ -22,7 +22,7 @@ export class ActionService {
     public async executeAction(action: Action) {
         action.Token = localStorage.getItem('Token');
         if (this.websocket.connectionState !== WebsocketConnectionState.connected) {
-            await this.websocket.connect('ws://185.26.156.206:40406');
+            await this.websocket.connect('ws://localhost:1111');
         }
         this.websocket.sendRequest(JSON.stringify({ data: action }));
         // const res = await this._rest.executeAction(action);
